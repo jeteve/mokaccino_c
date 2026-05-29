@@ -11,7 +11,13 @@ pub(crate) fn assert_run_c(c_prog: &str) {
         .join("tests")
         .join("c")
         .join(c_prog);
-    let out_exe_path = PathBuf::from(&manifest_dir).join("target").join("test_app");
+
+    // Remove extension from c_prog.
+    let c_prog_bin = c_prog
+        .strip_suffix(".c")
+        .expect("{c_prog:?} does not end with .c");
+
+    let out_exe_path = PathBuf::from(&manifest_dir).join("target").join(c_prog_bin);
 
     // Dynamically find out if Cargo is building in debug or release mode
     let mut target_dir = env::current_exe().unwrap();
@@ -42,10 +48,10 @@ pub(crate) fn assert_run_c(c_prog: &str) {
     let run_status = Command::new(&out_exe_path)
         .env("LD_LIBRARY_PATH", &target_dir)
         .status()
-        .expect("Failed to run the compiled C program");
+        .expect("Failed to run the compiled C program {out_exe_path:?}");
 
     assert!(
         run_status.success(),
-        "The compiled C program from {test_c_path:?} failed to run or crashed"
+        "The compiled C program {out_exe_path:?} from {test_c_path:?} failed to run or crashed"
     );
 }
