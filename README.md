@@ -13,5 +13,7 @@ cargo build
 ## Test
 
 ```sh
-cargo test
+cargo build && cargo test
 ```
+
+> ⚠️ Note `cargo test` will NOT work without the build.

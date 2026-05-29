@@ -21,7 +21,7 @@ pub(crate) fn assert_run_c(c_prog: &str) {
     }
 
     // 1. Compile the C program
-    let compile_status = Command::new("gcc")
+    let compile_status = Command::new("clang")
         .arg(&test_c_path)
         .arg("-o")
         .arg(&out_exe_path)
