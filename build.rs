@@ -1,5 +1,3 @@
-use cbindgen;
-
 use std::env;
 
 fn main() {
