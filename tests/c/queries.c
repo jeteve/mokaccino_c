@@ -40,13 +40,15 @@ int main(void) {
 
     mokaccino_q_term(&q, "field", "value");
 
+    printf("Query: %s\n", mokaccino_q_debug(q));
+
 
     // Negate it.
     mokaccino_q_negation(&q);
 
-    mokaccino_q_free(&q);
+    printf("Query: %s\n", mokaccino_q_debug(q));
 
-    
+    mokaccino_q_free(&q);
 
     if( q != NULL ){
         printf("Q is not NULL");

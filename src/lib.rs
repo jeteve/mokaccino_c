@@ -13,6 +13,24 @@ pub unsafe extern "C" fn mokaccino_version() -> *const std::ffi::c_char {
     VERSION.as_ptr() as *const std::ffi::c_char
 }
 
+/// Returns a debug C string representation of the query.
+///
+/// # Safety
+/// - `q` must be a valid pointer to a `Query`.
+/// - The caller takes ownership of the returned string and must free it using `mokaccino_string_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn mokaccino_q_debug(q: *const Query) -> *mut std::ffi::c_char {
+    if q.is_null() {
+        return std::ptr::null_mut();
+    }
+    let query = unsafe { &*q };
+    let debug_str = format!("{:?}", query.0);
+    match std::ffi::CString::new(debug_str) {
+        Ok(c_str) => c_str.into_raw(),
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
 ///
 /// # Safety
 /// - q is not NULL
