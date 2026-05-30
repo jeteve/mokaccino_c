@@ -1,6 +1,6 @@
 use h3o::CellIndex;
 use mokaccino::prelude::*;
-use std::ptr::null_mut;
+use std::{ffi::c_int, ptr::null_mut};
 
 use super::MOKACCINO_ERROR;
 
@@ -46,7 +46,7 @@ pub unsafe extern "C" fn mokaccino_q_tostring(q: *const Query) -> *mut std::ffi:
     }
 }
 
-unsafe fn build_two_qs<F>(q1: *mut *mut Query, q2: *mut *mut Query, builder: F) -> i32
+unsafe fn build_two_qs<F>(q1: *mut *mut Query, q2: *mut *mut Query, builder: F) -> c_int
 where
     F: Fn(mokaccino::prelude::Query, mokaccino::prelude::Query) -> mokaccino::prelude::Query,
 {
@@ -88,7 +88,7 @@ where
 ///   after this operation.
 ///   
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn mokaccino_q_and(q1: *mut *mut Query, q2: *mut *mut Query) -> i32 {
+pub unsafe extern "C" fn mokaccino_q_and(q1: *mut *mut Query, q2: *mut *mut Query) -> c_int {
     unsafe { build_two_qs(q1, q2, |q1, q2| q1 & q2) }
 }
 
@@ -104,7 +104,7 @@ pub unsafe extern "C" fn mokaccino_q_and(q1: *mut *mut Query, q2: *mut *mut Quer
 ///   after this operation.
 ///   
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn mokaccino_q_or(q1: *mut *mut Query, q2: *mut *mut Query) -> i32 {
+pub unsafe extern "C" fn mokaccino_q_or(q1: *mut *mut Query, q2: *mut *mut Query) -> c_int {
     unsafe { build_two_qs(q1, q2, |q1, q2| q1 | q2) }
 }
 
@@ -113,7 +113,7 @@ pub unsafe extern "C" fn mokaccino_q_or(q1: *mut *mut Query, q2: *mut *mut Query
 /// - q is not NULL
 /// - *q is not NULL
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn mokaccino_q_negation(q: *mut *mut Query) -> i32 {
+pub unsafe extern "C" fn mokaccino_q_negation(q: *mut *mut Query) -> c_int {
     if q.is_null() {
         eprintln!("ERROR: given q pointer is null");
         return MOKACCINO_ERROR;
@@ -140,7 +140,7 @@ unsafe fn field_int_build<F>(
     field: *const std::ffi::c_char,
     value: i64,
     builder: F,
-) -> i32
+) -> c_int
 where
     F: Fn(&str, i64) -> mokaccino::prelude::Query,
 {
@@ -185,7 +185,7 @@ pub unsafe extern "C" fn mokaccino_q_klt(
     q: *mut *mut Query,
     field: *const std::ffi::c_char,
     value: i64,
-) -> i32 {
+) -> c_int {
     unsafe { field_int_build(q, field, value, |f, v| f.i64_lt(v)) }
 }
 
@@ -198,7 +198,7 @@ pub unsafe extern "C" fn mokaccino_q_kle(
     q: *mut *mut Query,
     field: *const std::ffi::c_char,
     value: i64,
-) -> i32 {
+) -> c_int {
     unsafe { field_int_build(q, field, value, |f, v| f.i64_le(v)) }
 }
 
@@ -211,7 +211,7 @@ pub unsafe extern "C" fn mokaccino_q_kgt(
     q: *mut *mut Query,
     field: *const std::ffi::c_char,
     value: i64,
-) -> i32 {
+) -> c_int {
     unsafe { field_int_build(q, field, value, |f, v| f.i64_gt(v)) }
 }
 
@@ -224,7 +224,7 @@ pub unsafe extern "C" fn mokaccino_q_kge(
     q: *mut *mut Query,
     field: *const std::ffi::c_char,
     value: i64,
-) -> i32 {
+) -> c_int {
     unsafe { field_int_build(q, field, value, |f, v| f.i64_ge(v)) }
 }
 
@@ -237,7 +237,7 @@ pub unsafe extern "C" fn mokaccino_q_keq(
     q: *mut *mut Query,
     field: *const std::ffi::c_char,
     value: i64,
-) -> i32 {
+) -> c_int {
     unsafe { field_int_build(q, field, value, |f, v| f.i64_eq(v)) }
 }
 
@@ -246,7 +246,7 @@ unsafe fn two_strings_build<F>(
     field: *const std::ffi::c_char,
     value: *const std::ffi::c_char,
     builder: F,
-) -> i32
+) -> c_int
 where
     F: Fn(&str, &str) -> mokaccino::prelude::Query,
 {
@@ -304,7 +304,7 @@ pub unsafe extern "C" fn mokaccino_q_term(
     q: *mut *mut Query,
     field: *const std::ffi::c_char,
     value: *const std::ffi::c_char,
-) -> i32 {
+) -> c_int {
     unsafe { two_strings_build(q, field, value, |f, v| f.has_value(v)) }
 }
 
@@ -326,7 +326,7 @@ pub unsafe extern "C" fn mokaccino_q_h3in(
     q: *mut *mut Query,
     field: *const std::ffi::c_char,
     value: *const std::ffi::c_char,
-) -> i32 {
+) -> c_int {
     let builder = |f: &str, v: &str| {
         // Try building an h3 cell index. Fallback to a plain term query if invalid.
         if let Ok(ci) = v.parse::<CellIndex>() {
@@ -352,7 +352,7 @@ pub unsafe extern "C" fn mokaccino_q_prefix(
     q: *mut *mut Query,
     field: *const std::ffi::c_char,
     value: *const std::ffi::c_char,
-) -> i32 {
+) -> c_int {
     unsafe { two_strings_build(q, field, value, |f, v| f.has_prefix(v)) }
 }
 
