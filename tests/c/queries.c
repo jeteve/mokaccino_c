@@ -60,9 +60,19 @@ int main(void) {
     mokaccino_q_free(&q);
 
     if( q != NULL ){
-        printf("ERROR: Q is not NULL");
+        printf("ERROR: Q is not NULL\n");
         return 1;
     }
+
+    // Test H3IN query
+    if( mokaccino_q_h3in(&q, "location", "81197ffffffffff") != 0){
+        printf("Failed to build a h3in query\n");
+        return 1;
+    }
+    debug = mokaccino_q_debug(q);
+    printf("Query: %s\n", debug);
+    mokaccino_string_free(&debug);
+    mokaccino_q_free(&q);
 
 
     // Test prefix query

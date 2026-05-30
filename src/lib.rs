@@ -1,5 +1,6 @@
 use std::ptr::null_mut;
 
+use h3o::CellIndex;
 use mokaccino::models::cnf::CNFQueryable;
 
 static VERSION: &str = concat!(env!("CARGO_PKG_VERSION"), "\0");
@@ -317,6 +318,8 @@ where
     0
 }
 
+/// Builds a simple term query `field=value`
+///
 ///
 /// Returns -1 in case of error. Sets the given pointer otherwise.
 ///
@@ -331,6 +334,38 @@ pub unsafe extern "C" fn mokaccino_q_term(
     value: *const std::ffi::c_char,
 ) -> i32 {
     unsafe { two_strings_build(q, field, value, |f, v| f.has_value(v)) }
+}
+
+/// Builds a query where when the field is a value H3 cell index, the document values
+/// are checked for their inclusion in the given H3 index.
+///
+/// See (h3 documentation)[https://h3geo.org/].
+///
+/// Falls back to a plain term query if the give H3 index is not correct.
+///
+/// Returns -1 in case of error. Sets the given pointer otherwise.
+///
+/// # Safety
+/// - q must be a valid pointer to a Query *
+/// - field and value must be NULL terminated valid UTF8 bytes or an ASCII string.
+///
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn mokaccino_q_h3in(
+    q: *mut *mut Query,
+    field: *const std::ffi::c_char,
+    value: *const std::ffi::c_char,
+) -> i32 {
+    let builder = |f: &str, v: &str| {
+        // Try building an h3 cell index. Fallback to a plain term query if invalid.
+        if let Ok(ci) = v.parse::<CellIndex>() {
+            f.h3in(ci)
+        } else {
+            eprintln!("Given value {v} is not a correct H3 Cell Index.");
+            f.has_value(v)
+        }
+    };
+
+    unsafe { two_strings_build(q, field, value, builder) }
 }
 
 ///

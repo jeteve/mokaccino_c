@@ -11,6 +11,7 @@ name = "mokaccino"
 
 [dependencies]
 mokaccino = "0.8.0"
+h3o = "0.9.4"
 
 [build-dependencies]
 cbindgen="0.29.3"
