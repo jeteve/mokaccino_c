@@ -13,7 +13,12 @@ cargo build
 ## Test
 
 ```sh
-cargo build && cargo test
+# Test debug builds:
+cargo build && cargo test -- --nocapture
+
+# Test release builds:
+cargo build --release && cargo test --release  -- --nocapture
 ```
+
 
 > ⚠️ Note `cargo test` will NOT work without the build.

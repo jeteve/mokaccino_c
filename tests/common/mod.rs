@@ -25,6 +25,7 @@ pub(crate) fn assert_run_c(c_prog: &str) {
     if target_dir.ends_with("deps") {
         target_dir.pop(); // Step out of the "deps" directory
     }
+    println!("Linking into {target_dir:?}");
 
     // 1. Compile the C program
     let compile_status = Command::new("clang")
@@ -33,7 +34,7 @@ pub(crate) fn assert_run_c(c_prog: &str) {
         .arg(&out_exe_path)
         .arg(format!("-I{}", include_dir.display()))
         .arg(format!("-L{}", target_dir.display()))
-        .arg("-lmokaccino_c")
+        .arg("-lmokaccino")
         .arg("-lpthread")
         .arg("-ldl")
         .status()

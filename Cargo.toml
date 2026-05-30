@@ -7,6 +7,7 @@ readme = "README.md"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
 crate-type = ["cdylib", "staticlib"]
+name = "mokaccino"
 
 [dependencies]
 mokaccino = "0.8.0"
