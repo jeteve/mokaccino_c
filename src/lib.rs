@@ -2,6 +2,15 @@ use std::ffi::c_int;
 
 mod queries;
 
+/***
+ * This is mokaccino, the percolator library.
+ *
+ * This C binding source code can be found here:
+ * https://github.com/jeteve/mokaccino_c
+ *
+ *
+ */
+
 static VERSION: &str = concat!(env!("CARGO_PKG_VERSION"), "\0");
 
 /// A generic error return code for the C API.

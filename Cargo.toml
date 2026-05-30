@@ -9,6 +9,9 @@ readme = "README.md"
 crate-type = ["cdylib", "staticlib"]
 name = "mokaccino"
 
+[profile.release]
+panic = "abort"
+
 [dependencies]
 mokaccino = "0.8.0"
 h3o = "0.9.4"

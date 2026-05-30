@@ -1,14 +1,22 @@
 # mokaccino_c
 
-A C library based on (mokaccino)[https://crates.io/crates/mokaccino]
+A C library to use [mokaccino](https://crates.io/crates/mokaccino) from C programs.
 
-This will expose the same interface as the (Python binding)[https://github.com/jeteve/mokaccino_py]
+## Usage
+
+See examples in `tests/c/`.
+
+Those are the programs that are compiled and ran from the test suite.
 
 ## Build
 
 ```sh
 cargo build
+# or
+cargo build --release
 ```
+
+You'll then find the binaries (both .so and .a) and the header in `target/include` and in `target/[debug|release]/libmokaccino.*`
 
 ## Test
 
