@@ -6,6 +6,7 @@ fn main() {
     cbindgen::Builder::new()
         .with_crate(crate_dir)
         .with_language(cbindgen::Language::C)
+        .with_include_guard("MOKACCINO_H")
         .generate()
         .expect("Unable to generate bindings")
         .write_to_file("target/include/mokaccino.h");

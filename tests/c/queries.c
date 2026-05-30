@@ -40,6 +40,13 @@ int main(void) {
     char* debug = mokaccino_q_debug(q);
 
     printf("Query: %s\n", debug);
+
+    // Try building a new q before freeing it.
+    if( mokaccino_q_term(&q, "field2", "value2") == 0 ){
+        printf("mokaccino_q_term should return -1 when building on top of an unfreed Query*\n");
+        return 1;
+    }
+
     mokaccino_string_free(&debug);
 
 

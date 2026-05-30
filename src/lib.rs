@@ -1,5 +1,7 @@
 use std::ptr::null_mut;
 
+use mokaccino::models::cnf::CNFQueryable;
+
 static VERSION: &str = concat!(env!("CARGO_PKG_VERSION"), "\0");
 
 /// An opaque Query structure
@@ -164,7 +166,111 @@ pub unsafe extern "C" fn mokaccino_q_negation(q: *mut *mut Query) -> i32 {
     0
 }
 
-unsafe fn two_values_build<F>(
+unsafe fn field_int_build<F>(
+    q: *mut *mut Query,
+    field: *const std::ffi::c_char,
+    value: i64,
+    builder: F,
+) -> i32
+where
+    F: Fn(&str, i64) -> mokaccino::prelude::Query,
+{
+    if q.is_null() {
+        eprintln!("given q pointer is null");
+        return -1;
+    }
+
+    let qq = unsafe { *q };
+    if !qq.is_null() {
+        eprintln!("given q pointer is NOT a null *Query. Calling this would lead to a memory leak");
+        return -1;
+    }
+
+    if field.is_null() {
+        eprintln!("Field is null");
+        return -1;
+    }
+
+    let field_c = unsafe { std::ffi::CStr::from_ptr(field) }.to_str();
+    if field_c.is_err() {
+        eprintln!("Invalid UTF8 field string {field_c:?}");
+        return -1;
+    }
+    let field_c = field_c.unwrap();
+
+    unsafe {
+        *q = Box::into_raw(Box::new(Query(builder(field_c, value))));
+    }
+
+    0
+}
+
+/// A query where the field `k` as an integer must be lower than the given `value`
+///
+/// # Safety
+/// - q must be a valid Query** pointing to a NULL Query* to avoid memory leaks.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn mokaccino_q_klt(
+    q: *mut *mut Query,
+    field: *const std::ffi::c_char,
+    value: i64,
+) -> i32 {
+    unsafe { field_int_build(q, field, value, |f, v| f.i64_lt(v)) }
+}
+
+/// A query where the field `k` as an integer must be lower than or equal to the given `value`
+///
+/// # Safety
+/// - q must be a valid Query** pointing to a NULL Query* to avoid memory leaks.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn mokaccino_q_kle(
+    q: *mut *mut Query,
+    field: *const std::ffi::c_char,
+    value: i64,
+) -> i32 {
+    unsafe { field_int_build(q, field, value, |f, v| f.i64_le(v)) }
+}
+
+/// A query where the field `k` as an integer must be greater than the given `value`
+///
+/// # Safety
+/// - q must be a valid Query** pointing to a NULL Query* to avoid memory leaks.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn mokaccino_q_kgt(
+    q: *mut *mut Query,
+    field: *const std::ffi::c_char,
+    value: i64,
+) -> i32 {
+    unsafe { field_int_build(q, field, value, |f, v| f.i64_gt(v)) }
+}
+
+/// A query where the field `k` as an integer must be greater than or equal to the given `value`
+///
+/// # Safety
+/// - q must be a valid Query** pointing to a NULL Query* to avoid memory leaks.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn mokaccino_q_kge(
+    q: *mut *mut Query,
+    field: *const std::ffi::c_char,
+    value: i64,
+) -> i32 {
+    unsafe { field_int_build(q, field, value, |f, v| f.i64_ge(v)) }
+}
+
+/// A query where the field `k` as an integer must be equal to the given `value`
+///
+/// # Safety
+/// - q must be a valid Query** pointing to a NULL Query* to avoid memory leaks.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn mokaccino_q_keq(
+    q: *mut *mut Query,
+    field: *const std::ffi::c_char,
+    value: i64,
+) -> i32 {
+    unsafe { field_int_build(q, field, value, |f, v| f.i64_eq(v)) }
+}
+
+unsafe fn two_strings_build<F>(
     q: *mut *mut Query,
     field: *const std::ffi::c_char,
     value: *const std::ffi::c_char,
@@ -175,6 +281,12 @@ where
 {
     if q.is_null() {
         eprintln!("given q pointer is null");
+        return -1;
+    }
+
+    let qq = unsafe { *q };
+    if !qq.is_null() {
+        eprintln!("given q pointer is NOT a null *Query. Calling this would lead to a memory leak");
         return -1;
     }
 
@@ -218,11 +330,7 @@ pub unsafe extern "C" fn mokaccino_q_term(
     field: *const std::ffi::c_char,
     value: *const std::ffi::c_char,
 ) -> i32 {
-    unsafe {
-        two_values_build(q, field, value, |f, v| {
-            mokaccino::prelude::Query::term(f, v)
-        })
-    }
+    unsafe { two_strings_build(q, field, value, |f, v| f.has_value(v)) }
 }
 
 ///
@@ -238,11 +346,7 @@ pub unsafe extern "C" fn mokaccino_q_prefix(
     field: *const std::ffi::c_char,
     value: *const std::ffi::c_char,
 ) -> i32 {
-    unsafe {
-        two_values_build(q, field, value, |f, v| {
-            mokaccino::prelude::Query::prefix(f, v)
-        })
-    }
+    unsafe { two_strings_build(q, field, value, |f, v| f.has_prefix(v)) }
 }
 
 ///
