@@ -1,3 +1,5 @@
+use std::ptr::null_mut;
+
 static VERSION: &str = concat!(env!("CARGO_PKG_VERSION"), "\0");
 
 /// An opaque Query structure
@@ -52,6 +54,68 @@ pub unsafe extern "C" fn mokaccino_string_free(s: *mut *mut std::ffi::c_char) {
         let _ = std::ffi::CString::from_raw(*s);
         *s = std::ptr::null_mut();
     }
+}
+
+unsafe fn build_two_qs<F>(q1: *mut *mut Query, q2: *mut *mut Query, builder: F) -> i32
+where
+    F: Fn(mokaccino::prelude::Query, mokaccino::prelude::Query) -> mokaccino::prelude::Query,
+{
+    if q1.is_null() || q2.is_null() {
+        eprintln!("Either q1 or q2 is null");
+        return -1;
+    }
+
+    let qq1 = unsafe { *q1 };
+    let qq2 = unsafe { *q2 };
+
+    if qq1.is_null() || qq2.is_null() {
+        eprintln!("Either q1 or q2 points to a NULL *Query");
+        return -1;
+    }
+
+    let bq1 = unsafe { Box::from_raw(qq1) };
+    let bq2 = unsafe { Box::from_raw(qq2) };
+
+    let new_q = builder(bq1.0, bq2.0);
+
+    unsafe {
+        *q1 = Box::into_raw(Box::new(Query(new_q)));
+        *q2 = null_mut();
+    }
+
+    0
+}
+
+/// A logical AND between q1 and q2.
+///
+/// This consumes q1 and q2 and replaces q1 with the new Query*.
+/// q2 is nullified.
+///
+///
+/// # Safety
+/// - q1, q2 must be not null and pointing to not null *Query values.
+/// - If you copy and keep the value of q1 or q2 (of type Query*), they will be dandling pointers
+///   after this operation.
+///   
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn mokaccino_q_and(q1: *mut *mut Query, q2: *mut *mut Query) -> i32 {
+    unsafe { build_two_qs(q1, q2, |q1, q2| q1 & q2) }
+}
+
+/// A logical OR between q1 and q2.
+///
+/// This consumes q1 and q2 and replaces q1 with the new Query*.
+/// q2 is nullified.
+///
+///
+/// # Safety
+/// - q1, q2 must be not null and pointing to not null *Query values.
+/// - If you copy and keep the value of q1 or q2 (of type Query*), they will be dandling pointers
+///   after this operation.
+///   
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn mokaccino_q_or(q1: *mut *mut Query, q2: *mut *mut Query) -> i32 {
+    unsafe { build_two_qs(q1, q2, |q1, q2| q1 | q2) }
 }
 
 ///
