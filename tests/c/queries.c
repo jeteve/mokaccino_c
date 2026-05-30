@@ -39,21 +39,39 @@ int main(void) {
 
 
     mokaccino_q_term(&q, "field", "value");
+    char* debug = mokaccino_q_debug(q);
 
-    printf("Query: %s\n", mokaccino_q_debug(q));
+    printf("Query: %s\n", debug);
+    mokaccino_string_free(&debug);
 
 
     // Negate it.
     mokaccino_q_negation(&q);
 
-    printf("Query: %s\n", mokaccino_q_debug(q));
+    debug = mokaccino_q_debug(q);
+    printf("Query: %s\n", debug);
+    mokaccino_string_free(&debug);
 
     mokaccino_q_free(&q);
 
     if( q != NULL ){
-        printf("Q is not NULL");
+        printf("ERROR: Q is not NULL");
         return 1;
     }
+
+
+    // Test prefix query
+    if( mokaccino_q_prefix(&q, "field", "value") != 0 ){
+        printf("mokaccino_q_prefix should return 0\n");
+        return 1;
+    }
+
+    if( q == NULL ){
+        printf("ERROR: Q is NULL");
+        return 1;
+    }
+    mokaccino_q_free(&q);
+
 
     // All good.
     return 0;

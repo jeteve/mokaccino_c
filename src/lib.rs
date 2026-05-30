@@ -1,7 +1,6 @@
-use std::mem::take;
-
 static VERSION: &str = concat!(env!("CARGO_PKG_VERSION"), "\0");
 
+/// An opaque Query structure
 pub struct Query(mokaccino::prelude::Query);
 
 /// Returns the mokaccino_version string.
@@ -15,9 +14,11 @@ pub unsafe extern "C" fn mokaccino_version() -> *const std::ffi::c_char {
 
 /// Returns a debug C string representation of the query.
 ///
+/// Do NOT use C-space free to deallocate the returned string.
+///
 /// # Safety
 /// - `q` must be a valid pointer to a `Query`.
-/// - The caller takes ownership of the returned string and must free it using `mokaccino_string_free`.
+/// - The caller takes ownership of the returned string and must free it using `mokaccino_string_free(&s)`.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn mokaccino_q_debug(q: *const Query) -> *mut std::ffi::c_char {
     if q.is_null() {
@@ -28,6 +29,28 @@ pub unsafe extern "C" fn mokaccino_q_debug(q: *const Query) -> *mut std::ffi::c_
     match std::ffi::CString::new(debug_str) {
         Ok(c_str) => c_str.into_raw(),
         Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Frees a C string previously returned by this library (for example `mokaccino_q_debug`).
+///
+/// This will make the passed pointer to *char null.
+///
+/// # Safety
+/// - `s` must be a pointer previously returned by this library via `CString::into_raw()`.
+/// - Passing a null pointer is allowed and is a no-op.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn mokaccino_string_free(s: *mut *mut std::ffi::c_char) {
+    if s.is_null() {
+        return;
+    }
+    if unsafe { *s }.is_null() {
+        return;
+    }
+
+    unsafe {
+        let _ = std::ffi::CString::from_raw(*s);
+        *s = std::ptr::null_mut();
     }
 }
 
@@ -58,19 +81,15 @@ pub unsafe extern "C" fn mokaccino_q_negation(q: *mut *mut Query) -> i32 {
     0
 }
 
-///
-/// Returns -1 in case of error. Sets the given pointer otherwise.
-///
-/// # Safety
-/// - q must be a valid pointer to a Query *
-/// - field and value must be NULL terminated valid UTF8 bytes or an ASCII string.
-///
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn mokaccino_q_term(
+unsafe fn two_values_build<F>(
     q: *mut *mut Query,
     field: *const std::ffi::c_char,
     value: *const std::ffi::c_char,
-) -> i32 {
+    builder: F,
+) -> i32
+where
+    F: Fn(&str, &str) -> mokaccino::prelude::Query,
+{
     if q.is_null() {
         eprintln!("given q pointer is null");
         return -1;
@@ -82,7 +101,6 @@ pub unsafe extern "C" fn mokaccino_q_term(
     }
 
     let field_c = unsafe { std::ffi::CStr::from_ptr(field) }.to_str();
-
     if field_c.is_err() {
         eprintln!("Invalid UTF8 field string {field_c:?}");
         return -1;
@@ -98,12 +116,50 @@ pub unsafe extern "C" fn mokaccino_q_term(
     let value_c = value_c.unwrap();
 
     unsafe {
-        *q = Box::into_raw(Box::new(Query(mokaccino::prelude::Query::term(
-            field_c, value_c,
-        ))));
+        *q = Box::into_raw(Box::new(Query(builder(field_c, value_c))));
     }
 
     0
+}
+
+///
+/// Returns -1 in case of error. Sets the given pointer otherwise.
+///
+/// # Safety
+/// - q must be a valid pointer to a Query *
+/// - field and value must be NULL terminated valid UTF8 bytes or an ASCII string.
+///
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn mokaccino_q_term(
+    q: *mut *mut Query,
+    field: *const std::ffi::c_char,
+    value: *const std::ffi::c_char,
+) -> i32 {
+    unsafe {
+        two_values_build(q, field, value, |f, v| {
+            mokaccino::prelude::Query::term(f, v)
+        })
+    }
+}
+
+///
+/// Returns -1 in case of error. Sets the given pointer otherwise.
+///
+/// # Safety
+/// - q must be a valid pointer to a Query *
+/// - field and value must be NULL terminated valid UTF8 bytes or an ASCII string.
+///
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn mokaccino_q_prefix(
+    q: *mut *mut Query,
+    field: *const std::ffi::c_char,
+    value: *const std::ffi::c_char,
+) -> i32 {
+    unsafe {
+        two_values_build(q, field, value, |f, v| {
+            mokaccino::prelude::Query::prefix(f, v)
+        })
+    }
 }
 
 ///

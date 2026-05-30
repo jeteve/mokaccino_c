@@ -52,6 +52,6 @@ pub(crate) fn assert_run_c(c_prog: &str) {
 
     assert!(
         run_status.success(),
-        "The compiled C program {out_exe_path:?} from {test_c_path:?} failed to run or crashed"
+        "The compiled C program {out_exe_path:?} from {test_c_path:?} failed to run or crashed: {run_status}"
     );
 }
