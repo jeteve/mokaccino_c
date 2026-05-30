@@ -35,10 +35,8 @@ pub(crate) fn assert_run_c(c_prog: &str) {
         .arg(format!("-I{}", include_dir.display()))
         .arg(format!("-L{}", target_dir.display()))
         .arg("-lmokaccino")
-        .arg("-lpthread")
-        .arg("-ldl")
         .status()
-        .expect("Failed to execute gcc compiler. Is gcc installed?");
+        .expect("Failed to execute clang compiler. Is gcc installed?");
 
     assert!(
         compile_status.success(),
