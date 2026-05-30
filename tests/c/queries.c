@@ -92,7 +92,7 @@ int main(void) {
 
     // Now do an OR with q.
     mokaccino_q_or(&q, &q2);
-    debug = mokaccino_q_debug(q);
+    debug = mokaccino_q_tostring(q);
     printf("Query after OR: %s\n", debug);
     mokaccino_string_free(&debug);
 

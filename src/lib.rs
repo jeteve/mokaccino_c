@@ -16,7 +16,7 @@ pub unsafe extern "C" fn mokaccino_version() -> *const std::ffi::c_char {
 
 /// Returns a debug C string representation of the query.
 ///
-/// Do NOT use C-space free to deallocate the returned string.
+/// Do NOT use C-space `free` to deallocate the returned string.
 ///
 /// # Safety
 /// - `q` must be a valid pointer to a `Query`.
@@ -29,6 +29,25 @@ pub unsafe extern "C" fn mokaccino_q_debug(q: *const Query) -> *mut std::ffi::c_
     let query = unsafe { &*q };
     let debug_str = format!("{:?}", query.0);
     match std::ffi::CString::new(debug_str) {
+        Ok(c_str) => c_str.into_raw(),
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Returns a human friendly C string representation of the query.
+///
+/// Do NOT use C-space `free` to deallocate the returned string.
+///
+/// # Safety
+/// - `q` must be a valid pointer to a `Query`.
+/// - The caller takes ownership of the returned string and must free it using `mokaccino_string_free(&s)`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn mokaccino_q_tostring(q: *const Query) -> *mut std::ffi::c_char {
+    if q.is_null() {
+        return std::ptr::null_mut();
+    }
+    let query = unsafe { &*q };
+    match std::ffi::CString::new(query.0.to_string()) {
         Ok(c_str) => c_str.into_raw(),
         Err(_) => std::ptr::null_mut(),
     }
