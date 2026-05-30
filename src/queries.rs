@@ -2,6 +2,8 @@ use h3o::CellIndex;
 use mokaccino::prelude::*;
 use std::ptr::null_mut;
 
+use super::MOKACCINO_ERROR;
+
 /// An opaque Query structure
 pub struct Query(mokaccino::prelude::Query);
 
@@ -50,7 +52,7 @@ where
 {
     if q1.is_null() || q2.is_null() {
         eprintln!("Either q1 or q2 is null");
-        return -1;
+        return MOKACCINO_ERROR;
     }
 
     let qq1 = unsafe { *q1 };
@@ -58,7 +60,7 @@ where
 
     if qq1.is_null() || qq2.is_null() {
         eprintln!("Either q1 or q2 points to a NULL *Query");
-        return -1;
+        return MOKACCINO_ERROR;
     }
 
     let bq1 = unsafe { Box::from_raw(qq1) };
@@ -113,14 +115,14 @@ pub unsafe extern "C" fn mokaccino_q_or(q1: *mut *mut Query, q2: *mut *mut Query
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn mokaccino_q_negation(q: *mut *mut Query) -> i32 {
     if q.is_null() {
-        eprintln!("given q pointer is null");
-        return -1;
+        eprintln!("ERROR: given q pointer is null");
+        return MOKACCINO_ERROR;
     }
 
     let qq = unsafe { *q };
     if qq.is_null() {
-        eprintln!("given q pointer points to a NULL *Query");
-        return -1;
+        eprintln!("ERROR: given q pointer points to a NULL *Query");
+        return MOKACCINO_ERROR;
     }
 
     let qq = unsafe { Box::from_raw(qq) };
@@ -143,25 +145,27 @@ where
     F: Fn(&str, i64) -> mokaccino::prelude::Query,
 {
     if q.is_null() {
-        eprintln!("given q pointer is null");
-        return -1;
+        eprintln!("ERROR: given q pointer is null");
+        return MOKACCINO_ERROR;
     }
 
     let qq = unsafe { *q };
     if !qq.is_null() {
-        eprintln!("given q pointer is NOT a null *Query. Calling this would lead to a memory leak");
-        return -1;
+        eprintln!(
+            "ERROR: given q pointer is NOT a null *Query. Calling this would lead to a memory leak"
+        );
+        return MOKACCINO_ERROR;
     }
 
     if field.is_null() {
-        eprintln!("Field is null");
-        return -1;
+        eprintln!("ERROR: Field is null");
+        return MOKACCINO_ERROR;
     }
 
     let field_c = unsafe { std::ffi::CStr::from_ptr(field) }.to_str();
     if field_c.is_err() {
-        eprintln!("Invalid UTF8 field string {field_c:?}");
-        return -1;
+        eprintln!("ERROR: Invalid UTF8 field string {field_c:?}");
+        return MOKACCINO_ERROR;
     }
     let field_c = field_c.unwrap();
 
@@ -247,33 +251,35 @@ where
     F: Fn(&str, &str) -> mokaccino::prelude::Query,
 {
     if q.is_null() {
-        eprintln!("given q pointer is null");
-        return -1;
+        eprintln!("ERROR: given q pointer is null");
+        return MOKACCINO_ERROR;
     }
 
     let qq = unsafe { *q };
     if !qq.is_null() {
-        eprintln!("given q pointer is NOT a null *Query. Calling this would lead to a memory leak");
-        return -1;
+        eprintln!(
+            "ERROR: given q pointer is NOT a null *Query. Calling this would lead to a memory leak"
+        );
+        return MOKACCINO_ERROR;
     }
 
     if field.is_null() || value.is_null() {
-        eprintln!("Either field or value is null");
-        return -1;
+        eprintln!("ERROR: Either field or value is null");
+        return MOKACCINO_ERROR;
     }
 
     let field_c = unsafe { std::ffi::CStr::from_ptr(field) }.to_str();
     if field_c.is_err() {
-        eprintln!("Invalid UTF8 field string {field_c:?}");
-        return -1;
+        eprintln!("ERROR: Invalid UTF8 field string {field_c:?}");
+        return MOKACCINO_ERROR;
     }
     let field_c = field_c.unwrap();
 
     let value_c = unsafe { std::ffi::CStr::from_ptr(value) }.to_str();
 
     if value_c.is_err() {
-        eprintln!("Invalid UTF8 value bytes {value_c:?}");
-        return -1;
+        eprintln!("ERROR: Invalid UTF8 value bytes {value_c:?}");
+        return MOKACCINO_ERROR;
     }
     let value_c = value_c.unwrap();
 
@@ -287,7 +293,7 @@ where
 /// Builds a simple term query `field=value`
 ///
 ///
-/// Returns -1 in case of error. Sets the given pointer otherwise.
+/// Returns MOKACCINO_ERROR in case of error. Sets the given pointer otherwise.
 ///
 /// # Safety
 /// - q must be a valid pointer to a Query *
@@ -309,7 +315,7 @@ pub unsafe extern "C" fn mokaccino_q_term(
 ///
 /// Falls back to a plain term query if the give H3 index is not correct.
 ///
-/// Returns -1 in case of error. Sets the given pointer otherwise.
+/// Returns MOKACCINO_ERROR in case of error. Sets the given pointer otherwise.
 ///
 /// # Safety
 /// - q must be a valid pointer to a Query *
@@ -326,7 +332,7 @@ pub unsafe extern "C" fn mokaccino_q_h3in(
         if let Ok(ci) = v.parse::<CellIndex>() {
             f.h3in(ci)
         } else {
-            eprintln!("Given value {v} is not a correct H3 Cell Index.");
+            eprintln!("WARNING: Given value {v} is not a correct H3 Cell Index.");
             f.has_value(v)
         }
     };
@@ -335,7 +341,7 @@ pub unsafe extern "C" fn mokaccino_q_h3in(
 }
 
 ///
-/// Returns -1 in case of error. Sets the given pointer otherwise.
+/// Returns MOKACCINO_ERROR in case of error. Sets the given pointer otherwise.
 ///
 /// # Safety
 /// - q must be a valid pointer to a Query *

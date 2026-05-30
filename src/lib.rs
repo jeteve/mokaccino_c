@@ -2,6 +2,10 @@ mod queries;
 
 static VERSION: &str = concat!(env!("CARGO_PKG_VERSION"), "\0");
 
+/// A generic error return code for the C API.
+#[unsafe(no_mangle)]
+pub static MOKACCINO_ERROR: i32 = -1;
+
 /// Returns the mokaccino_version string.
 ///
 /// # Safety

@@ -5,34 +5,34 @@ int main(void) {
     printf("Mokaccino queries test with version: %s\n", mokaccino_version());
 
     // Pathological:
-    if( mokaccino_q_term(NULL, "field", "value") != -1 ){
-        printf("mokaccino_q_term should return -1\n");
+    if( mokaccino_q_term(NULL, "field", "value") != MOKACCINO_ERROR ){
+        printf("mokaccino_q_term should return MOKACCINO_ERROR\n");
         return 1;
     }
 
     Query* q = NULL;
-    if( mokaccino_q_term(&q, NULL, "value") != -1 ){
-        printf("mokaccino_q_term should return -1\n");
+    if( mokaccino_q_term(&q, NULL, "value") != MOKACCINO_ERROR ){
+        printf("mokaccino_q_term should return MOKACCINO_ERROR\n");
         return 1;
     }
 
-    if( mokaccino_q_term(&q, "field", NULL) != -1 ){
-        printf("mokaccino_q_term should return -1\n");
+    if( mokaccino_q_term(&q, "field", NULL) != MOKACCINO_ERROR ){
+        printf("mokaccino_q_term should return MOKACCINO_ERROR\n");
         return 1;
     }
 
     // Invalid UTF8 bytes
     // "\xe2\x28\xa1"
-    if( mokaccino_q_term(&q, "field", "\xe2\x28\xa1") != -1 ){
-        printf("mokaccino_q_term should return -1\n");
+    if( mokaccino_q_term(&q, "field", "\xe2\x28\xa1") != MOKACCINO_ERROR ){
+        printf("mokaccino_q_term should return MOKACCINO_ERROR\n");
         return 1;
     }
 
 
     // Invalid UTF8 bytes
     // "\xe2\x28\xa1"
-    if( mokaccino_q_term(&q, "\xe2\x28\xa1", "value") != -1 ){
-        printf("mokaccino_q_term should return -1\n");
+    if( mokaccino_q_term(&q, "\xe2\x28\xa1", "value") != MOKACCINO_ERROR ){
+        printf("mokaccino_q_term should return MOKACCINO_ERROR\n");
         return 1;
     }
 
@@ -43,7 +43,7 @@ int main(void) {
 
     // Try building a new q before freeing it.
     if( mokaccino_q_term(&q, "field2", "value2") == 0 ){
-        printf("mokaccino_q_term should return -1 when building on top of an unfreed Query*\n");
+        printf("mokaccino_q_term should return MOKACCINO_ERROR when building on top of an unfreed Query*\n");
         return 1;
     }
 
