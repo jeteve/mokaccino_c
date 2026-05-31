@@ -13,7 +13,7 @@ name = "mokaccino"
 panic = "abort"
 
 [dependencies]
-mokaccino = "0.8.0"
+mokaccino = { version = "0.8.0", features = ["send", "serde"] }
 h3o = "0.9.4"
 
 [build-dependencies]
