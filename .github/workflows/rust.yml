@@ -16,6 +16,10 @@ jobs:
     - uses: actions/checkout@v4
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@stable
+    - name: Install other things
+      uses: ConorMacBride/install-package@v1
+      with:
+        apt: valgrind
     - name: Build
       run: cargo build
     - name: Run basic tests
@@ -23,8 +27,6 @@ jobs:
     - name: Build release
       run: cargo build --release
     - name: Run release tests
-      with:
-        apt: valgrind
       run: cargo test --release
 
     
