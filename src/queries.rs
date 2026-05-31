@@ -356,9 +356,10 @@ pub unsafe extern "C" fn mokaccino_q_prefix(
     unsafe { two_strings_build(q, field, value, |f, v| f.has_prefix(v)) }
 }
 
+/// Frees the memory at *Query, and sets *Query to NULL.
 ///
 /// # Safety
-/// Calling with null is safe.
+/// - Calling with null is safe.
 ///
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn mokaccino_q_free(q: *mut *mut Query) {

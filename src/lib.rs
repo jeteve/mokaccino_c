@@ -1,5 +1,6 @@
 use std::ffi::c_int;
 
+mod documents;
 mod queries;
 
 /***
