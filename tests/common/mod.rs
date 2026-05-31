@@ -53,4 +53,21 @@ pub(crate) fn assert_run_c(c_prog: &str) {
         run_status.success(),
         "The compiled C program {out_exe_path:?} from {test_c_path:?} failed to run or crashed: {run_status}"
     );
+
+    // 3. Check for memory leaks
+    // Inspired by https://github.com/cathay4t/librabc/blob/main/Makefile
+    let run_status = Command::new("valgrind")
+        .arg("--trace-children=yes")
+        .arg("--leak-check=full")
+        .arg("--show-leak-kinds=all")
+        .arg("--error-exitcode=1")
+        .arg(&out_exe_path)
+        .env("LD_LIBRARY_PATH", &target_dir)
+        .status()
+        .expect("Failed to run valgrind. Is valgrind installed and in the PATH?");
+
+    assert!(
+        run_status.success(),
+        "The compiled C program {out_exe_path:?} from {test_c_path:?} failed to pass memory leak status: {run_status}"
+    );
 }

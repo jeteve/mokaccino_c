@@ -6,9 +6,13 @@ A C library to use [mokaccino](https://crates.io/crates/mokaccino) from C progra
 
 See examples in `tests/c/`.
 
-Those are the programs that are compiled and ran from the test suite.
+Those are the programs that are compiled and ran from the test suite. They are also tested for memory leaks and
+do not contain any.
 
-## Build
+When you use mokaccino, it is important that you use the provided de-allocators for the types of objects you get
+from the library, including strings (chars*).
+
+## Building
 
 ```sh
 cargo build
