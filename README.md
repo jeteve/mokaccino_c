@@ -2,15 +2,24 @@
 
 A C library to use [mokaccino](https://crates.io/crates/mokaccino) from C programs.
 
+## About
+
+Mokaccino is a percolator library, allowing you to match streaming transient events or documents
+against a set of fairly static queries identified by your application ID.
+
+Mokkacino C binding is developed at https://github.com/jeteve/mokaccino_c by (Jerome Eteve)[https://github.com/jeteve].
+
 ## Usage
 
 See examples in `tests/c/`.
 
-Those are the programs that are compiled and ran from the test suite. They are also tested for memory leaks and
-do not contain any.
+Those are the programs that are compiled and ran from the test suite. They are also tested for memory leaks.
 
-When you use mokaccino, it is important that you use the provided de-allocators for the types of objects you get
-from the library, including strings (chars*).
+When you use mokaccino, it is important that you use the provided de-allocators for the types of objects you get from the library, _including_ strings (chars*).
+
+You are encourage to look at all the examples, but if you want a quick start,
+here's a [complete percolation example here](https://github.com/jeteve/mokaccino_c/blob/main/tests/c/percolator.c).
+
 
 ## Building
 
