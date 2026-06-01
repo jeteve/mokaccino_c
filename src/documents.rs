@@ -8,7 +8,7 @@ pub struct Document(pub(crate) mokaccino::prelude::Document);
 ///
 /// # Safety
 /// - d MUST be a NON-NULL **Document, pointing to a NULL *Document
-/// - Use `mokacino_d_free` when you're done with the document.
+/// - Use `mokaccino_d_free` when you're done with the document.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn mokaccino_d_new(d: *mut *mut Document) -> c_int {
     if d.is_null() {
@@ -35,7 +35,6 @@ pub unsafe extern "C" fn mokaccino_d_new(d: *mut *mut Document) -> c_int {
 ///
 /// # Safety
 /// - d is not NULL
-/// - *d is not NULL
 /// - Free the returned char* with `mokaccino_string_free`
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn mokaccino_d_debug(d: *const Document) -> *mut std::ffi::c_char {
@@ -57,7 +56,8 @@ pub unsafe extern "C" fn mokaccino_d_debug(d: *const Document) -> *mut std::ffi:
 /// # Safety
 /// - d is not NULL
 /// - *d is not NULL
-/// - do not save the value d* yourself.
+/// - do not save the value *d yourself.
+/// - field and value must be NULL terminated valid UTF8 bytes or an ASCII string.
 ///
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn mokaccino_d_add_value(
@@ -104,7 +104,7 @@ pub unsafe extern "C" fn mokaccino_d_add_value(
     0
 }
 
-/// Frees the memory at *Document, and sets *Document to NULL.
+/// Frees the memory at *d, and sets *d to NULL.
 ///
 /// # Safety
 /// - Calling with null is safe.

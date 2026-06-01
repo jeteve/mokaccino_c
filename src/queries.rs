@@ -84,7 +84,7 @@ where
 ///
 /// # Safety
 /// - q1, q2 must be not null and pointing to not null *Query values.
-/// - If you copy and keep the value of q1 or q2 (of type Query*), they will be dandling pointers
+/// - If you copy and keep the value of q1 or q2 (of type Query*), they will be dangling pointers
 ///   after this operation.
 ///   
 #[unsafe(no_mangle)]
@@ -108,6 +108,7 @@ pub unsafe extern "C" fn mokaccino_q_or(q1: *mut *mut Query, q2: *mut *mut Query
     unsafe { build_two_qs(q1, q2, |q1, q2| q1 | q2) }
 }
 
+/// Negates the given query.
 ///
 /// # Safety
 /// - q is not NULL
@@ -176,10 +177,11 @@ where
     0
 }
 
-/// A query where the field `k` as an integer must be lower than the given `value`
+/// A query where the field `field` as an integer must be lower than the given `value`
 ///
 /// # Safety
 /// - q must be a valid Query** pointing to a NULL Query* to avoid memory leaks.
+/// - field must be NULL terminated valid UTF8 bytes or an ASCII string.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn mokaccino_q_klt(
     q: *mut *mut Query,
@@ -189,10 +191,11 @@ pub unsafe extern "C" fn mokaccino_q_klt(
     unsafe { field_int_build(q, field, value, |f, v| f.i64_lt(v)) }
 }
 
-/// A query where the field `k` as an integer must be lower than or equal to the given `value`
+/// A query where the field `field` as an integer must be lower than or equal to the given `value`
 ///
 /// # Safety
 /// - q must be a valid Query** pointing to a NULL Query* to avoid memory leaks.
+/// - field must be NULL terminated valid UTF8 bytes or an ASCII string.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn mokaccino_q_kle(
     q: *mut *mut Query,
@@ -202,10 +205,11 @@ pub unsafe extern "C" fn mokaccino_q_kle(
     unsafe { field_int_build(q, field, value, |f, v| f.i64_le(v)) }
 }
 
-/// A query where the field `k` as an integer must be greater than the given `value`
+/// A query where the field `field` as an integer must be greater than the given `value`
 ///
 /// # Safety
 /// - q must be a valid Query** pointing to a NULL Query* to avoid memory leaks.
+/// - field must be NULL terminated valid UTF8 bytes or an ASCII string.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn mokaccino_q_kgt(
     q: *mut *mut Query,
@@ -215,10 +219,11 @@ pub unsafe extern "C" fn mokaccino_q_kgt(
     unsafe { field_int_build(q, field, value, |f, v| f.i64_gt(v)) }
 }
 
-/// A query where the field `k` as an integer must be greater than or equal to the given `value`
+/// A query where the field `field` as an integer must be greater than or equal to the given `value`
 ///
 /// # Safety
 /// - q must be a valid Query** pointing to a NULL Query* to avoid memory leaks.
+/// - field must be NULL terminated valid UTF8 bytes or an ASCII string.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn mokaccino_q_kge(
     q: *mut *mut Query,
@@ -228,10 +233,11 @@ pub unsafe extern "C" fn mokaccino_q_kge(
     unsafe { field_int_build(q, field, value, |f, v| f.i64_ge(v)) }
 }
 
-/// A query where the field `k` as an integer must be equal to the given `value`
+/// A query where the field `field` as an integer must be equal to the given `value`
 ///
 /// # Safety
 /// - q must be a valid Query** pointing to a NULL Query* to avoid memory leaks.
+/// - field must be NULL terminated valid UTF8 bytes or an ASCII string.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn mokaccino_q_keq(
     q: *mut *mut Query,
@@ -296,7 +302,7 @@ where
 /// Returns MOKACCINO_ERROR in case of error. Sets the given pointer otherwise.
 ///
 /// # Safety
-/// - q must be a valid pointer to a Query *
+/// - q must be a valid Query** pointing to a NULL Query* to avoid memory leaks.
 /// - field and value must be NULL terminated valid UTF8 bytes or an ASCII string.
 ///
 #[unsafe(no_mangle)]
@@ -313,12 +319,12 @@ pub unsafe extern "C" fn mokaccino_q_term(
 ///
 /// See (h3 documentation)[https://h3geo.org/].
 ///
-/// Falls back to a plain term query if the give H3 index is not correct.
+/// Falls back to a plain term query if the given H3 index is not correct.
 ///
 /// Returns MOKACCINO_ERROR in case of error. Sets the given pointer otherwise.
 ///
 /// # Safety
-/// - q must be a valid pointer to a Query *
+/// - q must be a valid Query** pointing to a NULL Query* to avoid memory leaks.
 /// - field and value must be NULL terminated valid UTF8 bytes or an ASCII string.
 ///
 #[unsafe(no_mangle)]
@@ -340,11 +346,12 @@ pub unsafe extern "C" fn mokaccino_q_h3in(
     unsafe { two_strings_build(q, field, value, builder) }
 }
 
+/// Builds a prefix query for the given field and value.
 ///
 /// Returns MOKACCINO_ERROR in case of error. Sets the given pointer otherwise.
 ///
 /// # Safety
-/// - q must be a valid pointer to a Query *
+/// - q must be a valid Query** pointing to a NULL Query* to avoid memory leaks.
 /// - field and value must be NULL terminated valid UTF8 bytes or an ASCII string.
 ///
 #[unsafe(no_mangle)]
