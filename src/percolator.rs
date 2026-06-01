@@ -8,7 +8,7 @@ pub struct Percolator(mokaccino::prelude::Percolator);
 ///
 /// # Safety
 /// - p MUST be a NON-NULL **Percolator, pointing to a NULL *Percolator
-/// - Use `mokacino_p_free` when you're done with the percolator to avoid memory leaks.
+/// - Use `mokaccino_p_free` when you're done with the percolator to avoid memory leaks.
 ///
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn mokaccino_p_new(p: *mut *mut Percolator) -> c_int {
@@ -38,7 +38,7 @@ pub unsafe extern "C" fn mokaccino_p_new(p: *mut *mut Percolator) -> c_int {
 /// # Safety
 /// - p cannot be NULL
 /// - q cannot be NULL
-/// - *q cannot by NULL
+/// - *q cannot be NULL
 /// - *q will be NULL after this call, as this consumes the Query.
 ///   You don't need to free the query as it will now live in the Percolator.
 #[unsafe(no_mangle)]
