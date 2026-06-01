@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "mokaccino.h"
 
 
@@ -17,10 +18,21 @@ int main(void) {
         return 1;
     }
 
-    if ( mokaccino_d_add_value(&d, "field2", "value2") == MOKACCINO_ERROR ){
+    char* buffer_f = calloc(32, sizeof(char));
+    char* buffer_v = calloc(32, sizeof(char));
+    
+    snprintf(buffer_f, 32, "field2");
+    snprintf(buffer_v, 32, "value2");
+
+    if ( mokaccino_d_add_value(&d, buffer_f, buffer_v) == MOKACCINO_ERROR ){
         printf("ERROR cannot add value to document\n");
         return 1;
     }
+
+    // It's safe to free those buffers. Copy of the strings are now owned
+    // by the document.
+    free(buffer_f);
+    free(buffer_v);
 
     char* debug = mokaccino_d_debug(d);
     printf("Document: %s\n", debug);

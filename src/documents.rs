@@ -50,6 +50,15 @@ pub unsafe extern "C" fn mokaccino_d_debug(d: *const Document) -> *mut std::ffi:
     }
 }
 
+/// Adds a field,value to this Document*
+///
+/// After this call, *d is replaced by a new value.
+///
+/// # Safety
+/// - d is not NULL
+/// - *d is not NULL
+/// - do not save the value d* yourself.
+///
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn mokaccino_d_add_value(
     d: *mut *mut Document,
