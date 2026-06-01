@@ -2,7 +2,7 @@ use std::ffi::c_int;
 
 use super::MOKACCINO_ERROR;
 
-pub struct Document(mokaccino::prelude::Document);
+pub struct Document(pub(crate) mokaccino::prelude::Document);
 
 /// Builds an empty document given a **Document to a NULL *Document
 ///

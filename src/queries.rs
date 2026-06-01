@@ -5,7 +5,7 @@ use std::{ffi::c_int, ptr::null_mut};
 use super::MOKACCINO_ERROR;
 
 /// An opaque Query structure
-pub struct Query(mokaccino::prelude::Query);
+pub struct Query(pub(crate) mokaccino::prelude::Query);
 
 /// Returns a debug C string representation of the query.
 ///
