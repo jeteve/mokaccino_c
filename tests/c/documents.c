@@ -13,6 +13,11 @@ int main(void) {
         return 1;
     }
 
+    if ( mokaccino_d_add_value(NULL, "field", "value") != MOKACCINO_ERROR ){
+        printf("ERROR add_value with NULL double pointer did not return error\n");
+        return 1;
+    }
+
     if ( mokaccino_d_add_value(&d, "field", "value") == MOKACCINO_ERROR ){
         printf("ERROR cannot add value to document\n");
         return 1;
