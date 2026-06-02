@@ -6,6 +6,12 @@
 int main(void) {
     printf("Mokaccino queries test with version: %s\n", mokaccino_version());
 
+    // Test error case: passing NULL pointer
+    if ( mokaccino_d_new(NULL) != MOKACCINO_ERROR ) {
+        printf("ERROR expected MOKACCINO_ERROR when passing NULL to mokaccino_d_new\n");
+        return 1;
+    }
+
     Document* d = NULL;
     
     if ( mokaccino_d_new(&d) == MOKACCINO_ERROR ){
