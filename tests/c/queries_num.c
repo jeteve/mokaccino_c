@@ -24,6 +24,11 @@ int main(void) {
             return 1;
         }
 
+        if( builders[fi](&q, "field", 43) == 0 ){
+            printf("ERROR: builders[%i] should return MOKACCINO_ERROR when building on top of an unfreed Query*\n", fi);
+            return 1;
+        }
+
         display = mokaccino_q_tostring(q);
         printf("\nQuery built: %s\n", display);
         mokaccino_string_free(&display);
