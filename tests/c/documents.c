@@ -8,6 +8,11 @@ int main(void) {
 
     Document* d = NULL;
     
+    if ( mokaccino_d_add_value(&d, "field", "value") != MOKACCINO_ERROR ){
+        printf("mokaccino_d_add_value should return MOKACCINO_ERROR when passed a **Document pointing to a NULL *Document\n");
+        return 1;
+    }
+
     if ( mokaccino_d_new(&d) == MOKACCINO_ERROR ){
         printf("ERROR cannot create correct document\n");
         return 1;
