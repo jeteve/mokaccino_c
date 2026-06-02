@@ -36,6 +36,12 @@ int main(void) {
         return 1;
     }
 
+    // Check we get an error if percolator is NULL
+    if ( mokaccino_p_index_id(NULL, &q, 42) != MOKACCINO_ERROR ){
+        printf("ERROR expected MOKACCINO_ERROR for NULL percolator\n");
+        return 1;
+    }
+
     // And index in the percolator under the number 42
     if( mokaccino_p_index_id(p, &q, 42) == MOKACCINO_ERROR ){
         printf("ERROR cannot index in percolator\n");
