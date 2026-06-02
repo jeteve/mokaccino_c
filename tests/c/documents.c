@@ -34,6 +34,19 @@ int main(void) {
     free(buffer_f);
     free(buffer_v);
 
+    // Invalid UTF8 bytes for value
+    // "\xe2\x28\xa1"
+    if ( mokaccino_d_add_value(&d, "field", "\xe2\x28\xa1") != MOKACCINO_ERROR ){
+        printf("ERROR added invalid UTF8 value to document\n");
+        return 1;
+    }
+
+    // Invalid UTF8 bytes for field
+    if ( mokaccino_d_add_value(&d, "\xe2\x28\xa1", "value") != MOKACCINO_ERROR ){
+        printf("ERROR added invalid UTF8 field to document\n");
+        return 1;
+    }
+
     char* debug = mokaccino_d_debug(d);
     printf("Document: %s\n", debug);
 
