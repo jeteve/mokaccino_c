@@ -53,6 +53,13 @@ int main(void) {
     // Index it
     mokaccino_p_index_id(p, &q, 43);
 
+    // Test null document error
+    MatchResults null_test_results = { .count = 0 };
+    if (mokaccino_p_percolate(p, NULL, on_match, &null_test_results) != MOKACCINO_ERROR) {
+        printf("ERROR: Expected MOKACCINO_ERROR when percolating with NULL document\n");
+        return 1;
+    }
+
     // Time to percolate a document.
     Document* d = NULL;
     mokaccino_d_new(&d);
