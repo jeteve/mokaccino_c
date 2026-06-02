@@ -73,6 +73,12 @@ int main(void) {
     // Will match the prefix query, but not the pure term query.
     mokaccino_d_new(&d);
     mokaccino_d_add_value(&d, "field", "valuation");
+    // Test that passing a NULL percolator fails properly
+    if (mokaccino_p_percolate(NULL, d, on_match, &results) != MOKACCINO_ERROR) {
+        printf("ERROR: mokaccino_p_percolate should return MOKACCINO_ERROR when passed a NULL percolator\n");
+        return 1;
+    }
+
     // Reset the result:
     results.count = 0;
     mokaccino_p_percolate(p, d, on_match, &results);
