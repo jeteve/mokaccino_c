@@ -29,6 +29,12 @@ int main(void) {
         return 1;
     }
 
+    // Check we cannot overwrite an existing percolator
+    if ( mokaccino_p_new(&p) != MOKACCINO_ERROR ){
+        printf("ERROR mokaccino_p_new allowed overwriting an existing percolator\n");
+        return 1;
+    }
+
     // Now build a query
     Query* q = NULL;
     if( mokaccino_q_term(&q, "field", "value") == MOKACCINO_ERROR ){
