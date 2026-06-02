@@ -29,6 +29,12 @@ int main(void) {
         return 1;
     }
 
+    // Test that passing a NULL pointer for q returns MOKACCINO_ERROR
+    if( mokaccino_p_index_id(p, NULL, 42) != MOKACCINO_ERROR ){
+        printf("ERROR: mokaccino_p_index_id should return MOKACCINO_ERROR when q is NULL\n");
+        return 1;
+    }
+
     // Now build a query
     Query* q = NULL;
     if( mokaccino_q_term(&q, "field", "value") == MOKACCINO_ERROR ){
