@@ -85,6 +85,28 @@ int main(void) {
         return 1;
     }
 
+    // Test NULL double pointer errors
+    if( mokaccino_q_and(NULL, &q) != MOKACCINO_ERROR ){
+        printf("mokaccino_q_and should return MOKACCINO_ERROR for NULL q1\n");
+        return 1;
+    }
+    if( mokaccino_q_and(&q, NULL) != MOKACCINO_ERROR ){
+        printf("mokaccino_q_and should return MOKACCINO_ERROR for NULL q2\n");
+        return 1;
+    }
+    if( mokaccino_q_or(NULL, &q) != MOKACCINO_ERROR ){
+        printf("mokaccino_q_or should return MOKACCINO_ERROR for NULL q1\n");
+        return 1;
+    }
+    if( mokaccino_q_or(&q, NULL) != MOKACCINO_ERROR ){
+        printf("mokaccino_q_or should return MOKACCINO_ERROR for NULL q2\n");
+        return 1;
+    }
+    if( q == NULL ){
+        printf("ERROR: Q is NULL");
+        return 1;
+    }
+
     // Make another query and do an and.
     Query* q2 = NULL;
     mokaccino_q_term(&q2, "field2", "value2");
