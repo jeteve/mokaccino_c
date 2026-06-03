@@ -35,7 +35,7 @@ pub(crate) fn assert_run_c(c_prog: &str) {
 
     // 1. Compile the C program
     let mut clang_cmd = Command::new("clang");
-    let mut clang_cmd = clang_cmd.arg(&test_c_path)
+    clang_cmd.arg(&test_c_path)
         .arg("-o")
         .arg(&out_exe_path)
         .arg(format!("-I{}", include_dir.display()))
@@ -43,7 +43,7 @@ pub(crate) fn assert_run_c(c_prog: &str) {
         .arg("-lmokaccino");
 
     if !has_valgrind {
-        clang_cmd = clang_cmd.arg("-fsanitize=address");
+        clang_cmd.arg("-fsanitize=address");
     }
 
     let compile_status = clang_cmd.status()
