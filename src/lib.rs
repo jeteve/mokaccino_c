@@ -1,5 +1,8 @@
 use std::ffi::c_int;
 
+#[macro_use]
+mod macros;
+
 mod documents;
 mod percolator;
 mod queries;
