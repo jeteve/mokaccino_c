@@ -6,15 +6,47 @@
 int main(void) {
     printf("Mokaccino queries test with version: %s\n", mokaccino_version());
 
+    // Test error case: passing NULL pointer
+    if ( mokaccino_d_new(NULL) != MOKACCINO_ERROR ) {
+        printf("ERROR expected MOKACCINO_ERROR when passing NULL to mokaccino_d_new\n");
+        return 1;
+    }
+
     Document* d = NULL;
     
+    if ( mokaccino_d_add_value(&d, "field", "value") != MOKACCINO_ERROR ){
+        printf("mokaccino_d_add_value should return MOKACCINO_ERROR when passed a **Document pointing to a NULL *Document\n");
+        return 1;
+    }
+
     if ( mokaccino_d_new(&d) == MOKACCINO_ERROR ){
         printf("ERROR cannot create correct document\n");
         return 1;
     }
 
+    if ( mokaccino_d_add_value(NULL, "field", "value") != MOKACCINO_ERROR ){
+        printf("ERROR add_value with NULL double pointer did not return error\n");
+        return 1;
+    }
+
     if ( mokaccino_d_add_value(&d, "field", "value") == MOKACCINO_ERROR ){
         printf("ERROR cannot add value to document\n");
+        return 1;
+    }
+
+    // Test null arguments
+    if ( mokaccino_d_add_value(&d, NULL, "value") != MOKACCINO_ERROR ){
+        printf("ERROR expected MOKACCINO_ERROR for NULL field\n");
+        return 1;
+    }
+
+    if ( mokaccino_d_add_value(&d, "field", NULL) != MOKACCINO_ERROR ){
+        printf("ERROR expected MOKACCINO_ERROR for NULL value\n");
+        return 1;
+    }
+
+    if ( mokaccino_d_add_value(&d, NULL, NULL) != MOKACCINO_ERROR ){
+        printf("ERROR expected MOKACCINO_ERROR for NULL field and value\n");
         return 1;
     }
 
@@ -33,6 +65,19 @@ int main(void) {
     // by the document.
     free(buffer_f);
     free(buffer_v);
+
+    // Invalid UTF8 bytes for value
+    // "\xe2\x28\xa1"
+    if ( mokaccino_d_add_value(&d, "field", "\xe2\x28\xa1") != MOKACCINO_ERROR ){
+        printf("ERROR added invalid UTF8 value to document\n");
+        return 1;
+    }
+
+    // Invalid UTF8 bytes for field
+    if ( mokaccino_d_add_value(&d, "\xe2\x28\xa1", "value") != MOKACCINO_ERROR ){
+        printf("ERROR added invalid UTF8 field to document\n");
+        return 1;
+    }
 
     char* debug = mokaccino_d_debug(d);
     printf("Document: %s\n", debug);

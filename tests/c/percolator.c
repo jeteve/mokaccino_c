@@ -29,6 +29,12 @@ int main(void) {
         return 1;
     }
 
+    // Check we cannot overwrite an existing percolator
+    if ( mokaccino_p_new(&p) != MOKACCINO_ERROR ){
+        printf("ERROR mokaccino_p_new allowed overwriting an existing percolator\n");
+        return 1;
+    }
+
     // Test that passing a NULL pointer for q returns MOKACCINO_ERROR
     if( mokaccino_p_index_id(p, NULL, 42) != MOKACCINO_ERROR ){
         printf("ERROR: mokaccino_p_index_id should return MOKACCINO_ERROR when q is NULL\n");
@@ -39,6 +45,12 @@ int main(void) {
     Query* q = NULL;
     if( mokaccino_q_term(&q, "field", "value") == MOKACCINO_ERROR ){
         printf("ERROR cannot build query\n");
+        return 1;
+    }
+
+    // Check we get an error if percolator is NULL
+    if ( mokaccino_p_index_id(NULL, &q, 42) != MOKACCINO_ERROR ){
+        printf("ERROR expected MOKACCINO_ERROR for NULL percolator\n");
         return 1;
     }
 
@@ -54,10 +66,23 @@ int main(void) {
         return 1;
     }
 
+    // Since *q is now NULL, indexing it again should fail with MOKACCINO_ERROR
+    if( mokaccino_p_index_id(p, &q, 42) != MOKACCINO_ERROR ){
+        printf("ERROR: indexing with null q should fail\n");
+        return 1;
+    }
+
     // Build a second query
     mokaccino_q_prefix(&q, "field", "val");
     // Index it
     mokaccino_p_index_id(p, &q, 43);
+
+    // Test null document error
+    MatchResults null_test_results = { .count = 0 };
+    if (mokaccino_p_percolate(p, NULL, on_match, &null_test_results) != MOKACCINO_ERROR) {
+        printf("ERROR: Expected MOKACCINO_ERROR when percolating with NULL document\n");
+        return 1;
+    }
 
     // Time to percolate a document.
     Document* d = NULL;
@@ -79,6 +104,12 @@ int main(void) {
     // Will match the prefix query, but not the pure term query.
     mokaccino_d_new(&d);
     mokaccino_d_add_value(&d, "field", "valuation");
+    // Test that passing a NULL percolator fails properly
+    if (mokaccino_p_percolate(NULL, d, on_match, &results) != MOKACCINO_ERROR) {
+        printf("ERROR: mokaccino_p_percolate should return MOKACCINO_ERROR when passed a NULL percolator\n");
+        return 1;
+    }
+
     // Reset the result:
     results.count = 0;
     mokaccino_p_percolate(p, d, on_match, &results);

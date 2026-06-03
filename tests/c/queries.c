@@ -49,6 +49,17 @@ int main(void) {
 
     mokaccino_string_free(&debug);
 
+    Query* null_q = NULL;
+    if( mokaccino_q_negation(NULL) != MOKACCINO_ERROR ){
+        printf("mokaccino_q_negation with NULL should return MOKACCINO_ERROR\n");
+        return 1;
+    }
+
+    if( mokaccino_q_negation(&null_q) != MOKACCINO_ERROR ){
+        printf("mokaccino_q_negation with NULL *Query should return MOKACCINO_ERROR\n");
+        return 1;
+    }
+
 
     // Negate it.
     mokaccino_q_negation(&q);
@@ -78,6 +89,28 @@ int main(void) {
     // Test prefix query
     if( mokaccino_q_prefix(&q, "field", "value") != 0 ){
         printf("mokaccino_q_prefix should return 0\n");
+        return 1;
+    }
+    if( q == NULL ){
+        printf("ERROR: Q is NULL");
+        return 1;
+    }
+
+    // Test NULL double pointer errors
+    if( mokaccino_q_and(NULL, &q) != MOKACCINO_ERROR ){
+        printf("mokaccino_q_and should return MOKACCINO_ERROR for NULL q1\n");
+        return 1;
+    }
+    if( mokaccino_q_and(&q, NULL) != MOKACCINO_ERROR ){
+        printf("mokaccino_q_and should return MOKACCINO_ERROR for NULL q2\n");
+        return 1;
+    }
+    if( mokaccino_q_or(NULL, &q) != MOKACCINO_ERROR ){
+        printf("mokaccino_q_or should return MOKACCINO_ERROR for NULL q1\n");
+        return 1;
+    }
+    if( mokaccino_q_or(&q, NULL) != MOKACCINO_ERROR ){
+        printf("mokaccino_q_or should return MOKACCINO_ERROR for NULL q2\n");
         return 1;
     }
     if( q == NULL ){
@@ -117,6 +150,27 @@ int main(void) {
     mokaccino_q_free(&q);
     mokaccino_q_free(&q2);
 
+    // Test NULL dereference in build_two_qs (mokaccino_q_and / mokaccino_q_or)
+    Query* q_null = NULL;
+    Query* q_valid = NULL;
+    mokaccino_q_term(&q_valid, "field", "value");
+
+    if (mokaccino_q_and(&q_null, &q_valid) != MOKACCINO_ERROR) {
+        printf("mokaccino_q_and should return MOKACCINO_ERROR for pointer to NULL\n");
+        return 1;
+    }
+
+    if (mokaccino_q_or(&q_valid, &q_null) != MOKACCINO_ERROR) {
+        printf("mokaccino_q_or should return MOKACCINO_ERROR for pointer to NULL\n");
+        return 1;
+    }
+
+    if (mokaccino_q_and(NULL, &q_valid) != MOKACCINO_ERROR) {
+        printf("mokaccino_q_and should return MOKACCINO_ERROR for NULL\n");
+        return 1;
+    }
+
+    mokaccino_q_free(&q_valid);
 
     // All good.
     return 0;
