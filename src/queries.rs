@@ -163,13 +163,7 @@ where
         return MOKACCINO_ERROR;
     }
 
-    let field_c = match unsafe { std::ffi::CStr::from_ptr(field) }.to_str() {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("ERROR: Invalid UTF8 field string {e:?}");
-            return MOKACCINO_ERROR;
-        }
-    };
+    let field_c = cstr_to_str!(field, "Invalid UTF8 field string");
 
     unsafe {
         *q = Box::into_raw(Box::new(Query(builder(field_c, value))));
@@ -275,21 +269,8 @@ where
         return MOKACCINO_ERROR;
     }
 
-    let field_c = match unsafe { std::ffi::CStr::from_ptr(field) }.to_str() {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("ERROR: Invalid UTF8 field string {e:?}");
-            return MOKACCINO_ERROR;
-        }
-    };
-
-    let value_c = match unsafe { std::ffi::CStr::from_ptr(value) }.to_str() {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("ERROR: Invalid UTF8 value bytes {e:?}");
-            return MOKACCINO_ERROR;
-        }
-    };
+    let field_c = cstr_to_str!(field, "Invalid UTF8 field string");
+    let value_c = cstr_to_str!(value, "Invalid UTF8 value bytes");
 
     unsafe {
         *q = Box::into_raw(Box::new(Query(builder(field_c, value_c))));
