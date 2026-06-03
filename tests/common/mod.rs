@@ -3,6 +3,12 @@ use std::path::PathBuf;
 use std::process::Command;
 
 pub(crate) fn assert_run_c(c_prog: &str) {
+    let has_valgrind = Command::new("valgrind")
+        .arg("--version")
+        .output()
+        .map(|o| o.status.success())
+        .unwrap_or(false);
+
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
 
     // Paths to our source and header files
@@ -28,14 +34,19 @@ pub(crate) fn assert_run_c(c_prog: &str) {
     println!("Linking into {target_dir:?}");
 
     // 1. Compile the C program
-    let compile_status = Command::new("clang")
-        .arg(&test_c_path)
+    let mut clang_cmd = Command::new("clang");
+    clang_cmd.arg(&test_c_path)
         .arg("-o")
         .arg(&out_exe_path)
         .arg(format!("-I{}", include_dir.display()))
         .arg(format!("-L{}", target_dir.display()))
-        .arg("-lmokaccino")
-        .status()
+        .arg("-lmokaccino");
+
+    if !has_valgrind {
+        clang_cmd.arg("-fsanitize=address");
+    }
+
+    let compile_status = clang_cmd.status()
         .expect("Failed to execute clang compiler. Is gcc installed?");
 
     assert!(
@@ -55,19 +66,21 @@ pub(crate) fn assert_run_c(c_prog: &str) {
     );
 
     // 3. Check for memory leaks
-    // Inspired by https://github.com/cathay4t/librabc/blob/main/Makefile
-    let run_status = Command::new("valgrind")
-        .arg("--trace-children=yes")
-        .arg("--leak-check=full")
-        .arg("--show-leak-kinds=all")
-        .arg("--error-exitcode=1")
-        .arg(&out_exe_path)
-        .env("LD_LIBRARY_PATH", &target_dir)
-        .status()
-        .expect("Failed to run valgrind. Is valgrind installed and in the PATH?");
+    if has_valgrind {
+        // Inspired by https://github.com/cathay4t/librabc/blob/main/Makefile
+        let run_status = Command::new("valgrind")
+            .arg("--trace-children=yes")
+            .arg("--leak-check=full")
+            .arg("--show-leak-kinds=all")
+            .arg("--error-exitcode=1")
+            .arg(&out_exe_path)
+            .env("LD_LIBRARY_PATH", &target_dir)
+            .status()
+            .expect("Failed to run valgrind. Is valgrind installed and in the PATH?");
 
-    assert!(
-        run_status.success(),
-        "The compiled C program {out_exe_path:?} from {test_c_path:?} failed to pass memory leak status: {run_status}"
-    );
+        assert!(
+            run_status.success(),
+            "The compiled C program {out_exe_path:?} from {test_c_path:?} failed to pass memory leak status: {run_status}"
+        );
+    }
 }
