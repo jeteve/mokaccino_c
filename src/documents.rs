@@ -80,21 +80,8 @@ pub unsafe extern "C" fn mokaccino_d_add_value(
         return MOKACCINO_ERROR;
     }
 
-    let field_c = match unsafe { std::ffi::CStr::from_ptr(field) }.to_str() {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("ERROR: Invalid UTF8 field string {e:?}");
-            return MOKACCINO_ERROR;
-        }
-    };
-
-    let value_c = match unsafe { std::ffi::CStr::from_ptr(value) }.to_str() {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("ERROR: Invalid UTF8 value bytes {e:?}");
-            return MOKACCINO_ERROR;
-        }
-    };
+    let field_c = cstr_to_str!(field, "Invalid UTF8 field string");
+    let value_c = cstr_to_str!(value, "Invalid UTF8 value bytes");
 
     let mut rust_d = unsafe { Box::from_raw(dd) };
     rust_d.0 = std::mem::take(&mut rust_d.0).with_value(field_c, value_c);
