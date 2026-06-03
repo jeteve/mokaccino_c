@@ -48,6 +48,12 @@ int main(void) {
         return 1;
     }
 
+    // Since *q is now NULL, indexing it again should fail with MOKACCINO_ERROR
+    if( mokaccino_p_index_id(p, &q, 42) != MOKACCINO_ERROR ){
+        printf("ERROR: indexing with null q should fail\n");
+        return 1;
+    }
+
     // Build a second query
     mokaccino_q_prefix(&q, "field", "val");
     // Index it
