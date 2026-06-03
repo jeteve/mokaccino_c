@@ -49,6 +49,17 @@ int main(void) {
 
     mokaccino_string_free(&debug);
 
+    Query* null_q = NULL;
+    if( mokaccino_q_negation(NULL) != MOKACCINO_ERROR ){
+        printf("mokaccino_q_negation with NULL should return MOKACCINO_ERROR\n");
+        return 1;
+    }
+
+    if( mokaccino_q_negation(&null_q) != MOKACCINO_ERROR ){
+        printf("mokaccino_q_negation with NULL *Query should return MOKACCINO_ERROR\n");
+        return 1;
+    }
+
 
     // Negate it.
     mokaccino_q_negation(&q);
