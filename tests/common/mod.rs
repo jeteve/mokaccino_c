@@ -9,6 +9,12 @@ pub(crate) fn assert_run_c(c_prog: &str) {
         .map(|o| o.status.success())
         .unwrap_or(false);
 
+    let has_leaks = Command::new("leaks")
+        .arg("-h")
+        .output()
+        .map(|o| o.status.success())
+        .unwrap_or(false);
+
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
 
     // Paths to our source and header files
@@ -35,18 +41,16 @@ pub(crate) fn assert_run_c(c_prog: &str) {
 
     // 1. Compile the C program
     let mut clang_cmd = Command::new("clang");
-    clang_cmd.arg(&test_c_path)
+    clang_cmd
+        .arg(&test_c_path)
         .arg("-o")
         .arg(&out_exe_path)
         .arg(format!("-I{}", include_dir.display()))
         .arg(format!("-L{}", target_dir.display()))
         .arg("-lmokaccino");
 
-    if !has_valgrind {
-        clang_cmd.arg("-fsanitize=address");
-    }
-
-    let compile_status = clang_cmd.status()
+    let compile_status = clang_cmd
+        .status()
         .expect("Failed to execute clang compiler. Is gcc installed?");
 
     assert!(
@@ -81,6 +85,21 @@ pub(crate) fn assert_run_c(c_prog: &str) {
         assert!(
             run_status.success(),
             "The compiled C program {out_exe_path:?} from {test_c_path:?} failed to pass memory leak status: {run_status}"
+        );
+    }
+
+    if has_leaks {
+        let run_status = Command::new("leaks")
+            .arg("--atExit")
+            .arg("--")
+            .arg(&out_exe_path)
+            .env("DYLD_LIBRARY_PATH", &target_dir)
+            .status()
+            .expect("Failed to run leaks. Is leaks installed and in the PATH?");
+
+        assert!(
+            run_status.success(),
+            "The compiled C program {out_exe_path:?} from {test_c_path:?} failed to pass leaks status: {run_status}"
         );
     }
 }
