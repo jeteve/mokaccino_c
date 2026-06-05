@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "mokaccino.h"
+#include "macros.h"
 
 
 // 1. State to capture the matches. (max 128)
@@ -24,47 +25,26 @@ int main(void) {
     printf("Mokaccino percolator test with version: %s\n", mokaccino_version());
 
     Percolator* p = NULL;
-    if ( mokaccino_p_new(&p) == MOKACCINO_ERROR ){
-        printf("ERROR cannot create correct percolator\n");
-        return 1;
-    }
+    ASSERT(mokaccino_p_new(&p) != MOKACCINO_ERROR, "ERROR cannot create correct percolator");
 
     // Check we cannot overwrite an existing percolator
-    if ( mokaccino_p_new(&p) != MOKACCINO_ERROR ){
-        printf("ERROR mokaccino_p_new allowed overwriting an existing percolator\n");
-        return 1;
-    }
+    ASSERT(mokaccino_p_new(&p) == MOKACCINO_ERROR, "ERROR mokaccino_p_new allowed overwriting an existing percolator");
 
     // Now build a query
     Query* q = NULL;
-    if( mokaccino_q_term(&q, "field", "value") == MOKACCINO_ERROR ){
-        printf("ERROR cannot build query\n");
-        return 1;
-    }
+    ASSERT(mokaccino_q_term(&q, "field", "value") != MOKACCINO_ERROR, "ERROR cannot build query");
 
     // Check we get an error if percolator is NULL
-    if ( mokaccino_p_index_id(NULL, &q, 42) != MOKACCINO_ERROR ){
-        printf("ERROR expected MOKACCINO_ERROR for NULL percolator\n");
-        return 1;
-    }
+    ASSERT(mokaccino_p_index_id(NULL, &q, 42) == MOKACCINO_ERROR, "ERROR expected MOKACCINO_ERROR for NULL percolator");
 
     // And index in the percolator under the number 42
-    if( mokaccino_p_index_id(p, &q, 42) == MOKACCINO_ERROR ){
-        printf("ERROR cannot index in percolator\n");
-        return 1;
-    }
+    ASSERT(mokaccino_p_index_id(p, &q, 42) != MOKACCINO_ERROR, "ERROR cannot index in percolator");
 
     // Check *q is now NULL
-    if( q != NULL ){
-        printf("ERROR: Q is not NULL");
-        return 1;
-    }
+    ASSERT(q == NULL, "ERROR: Q is not NULL");
 
     // Since *q is now NULL, indexing it again should fail with MOKACCINO_ERROR
-    if( mokaccino_p_index_id(p, &q, 42) != MOKACCINO_ERROR ){
-        printf("ERROR: indexing with null q should fail\n");
-        return 1;
-    }
+    ASSERT(mokaccino_p_index_id(p, &q, 42) == MOKACCINO_ERROR, "ERROR: indexing with null q should fail");
 
     // Build a second query
     mokaccino_q_prefix(&q, "field", "val");
@@ -73,10 +53,7 @@ int main(void) {
 
     // Test null document error
     MatchResults null_test_results = { .count = 0 };
-    if (mokaccino_p_percolate(p, NULL, on_match, &null_test_results) != MOKACCINO_ERROR) {
-        printf("ERROR: Expected MOKACCINO_ERROR when percolating with NULL document\n");
-        return 1;
-    }
+    ASSERT(mokaccino_p_percolate(p, NULL, on_match, &null_test_results) == MOKACCINO_ERROR, "ERROR: Expected MOKACCINO_ERROR when percolating with NULL document");
 
     // Time to percolate a document.
     Document* d = NULL;
@@ -89,20 +66,14 @@ int main(void) {
     mokaccino_d_free(&d);
 
     // There should be Two matches.
-    if ( results.count != 2 ){
-        printf("ERROR: Missing some matches");
-        return 1;
-    }
+    ASSERT(results.count == 2, "ERROR: Missing some matches");
 
     // Now another document with 'valuation'.
     // Will match the prefix query, but not the pure term query.
     mokaccino_d_new(&d);
     mokaccino_d_add_value(&d, "field", "valuation");
     // Test that passing a NULL percolator fails properly
-    if (mokaccino_p_percolate(NULL, d, on_match, &results) != MOKACCINO_ERROR) {
-        printf("ERROR: mokaccino_p_percolate should return MOKACCINO_ERROR when passed a NULL percolator\n");
-        return 1;
-    }
+    ASSERT(mokaccino_p_percolate(NULL, d, on_match, &results) == MOKACCINO_ERROR, "ERROR: mokaccino_p_percolate should return MOKACCINO_ERROR when passed a NULL percolator");
 
     // Reset the result:
     results.count = 0;
@@ -110,10 +81,7 @@ int main(void) {
     mokaccino_d_free(&d);
 
     // There should be One matches.
-    if ( results.count != 1 ){
-        printf("ERROR: Missing some matches");
-        return 1;
-    }
+    ASSERT(results.count == 1, "ERROR: Missing some matches");
 
     mokaccino_p_free(&p);
 

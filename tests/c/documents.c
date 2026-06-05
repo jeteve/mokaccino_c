@@ -1,65 +1,39 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "mokaccino.h"
+#include "macros.h"
 
 
 int main(void) {
     printf("Mokaccino queries test with version: %s\n", mokaccino_version());
 
     // Test error case: passing NULL pointer
-    if ( mokaccino_d_new(NULL) != MOKACCINO_ERROR ) {
-        printf("ERROR expected MOKACCINO_ERROR when passing NULL to mokaccino_d_new\n");
-        return 1;
-    }
+    ASSERT(mokaccino_d_new(NULL) == MOKACCINO_ERROR, "ERROR expected MOKACCINO_ERROR when passing NULL to mokaccino_d_new");
 
     Document* d = NULL;
-    
-    if ( mokaccino_d_add_value(&d, "field", "value") != MOKACCINO_ERROR ){
-        printf("mokaccino_d_add_value should return MOKACCINO_ERROR when passed a **Document pointing to a NULL *Document\n");
-        return 1;
-    }
 
-    if ( mokaccino_d_new(&d) == MOKACCINO_ERROR ){
-        printf("ERROR cannot create correct document\n");
-        return 1;
-    }
+    ASSERT(mokaccino_d_add_value(&d, "field", "value") == MOKACCINO_ERROR, "mokaccino_d_add_value should return MOKACCINO_ERROR when passed a **Document pointing to a NULL *Document");
 
-    if ( mokaccino_d_add_value(NULL, "field", "value") != MOKACCINO_ERROR ){
-        printf("ERROR add_value with NULL double pointer did not return error\n");
-        return 1;
-    }
+    ASSERT(mokaccino_d_new(&d) != MOKACCINO_ERROR, "ERROR cannot create correct document");
 
-    if ( mokaccino_d_add_value(&d, "field", "value") == MOKACCINO_ERROR ){
-        printf("ERROR cannot add value to document\n");
-        return 1;
-    }
+    ASSERT(mokaccino_d_add_value(NULL, "field", "value") == MOKACCINO_ERROR, "ERROR add_value with NULL double pointer did not return error");
+
+    ASSERT(mokaccino_d_add_value(&d, "field", "value") != MOKACCINO_ERROR, "ERROR cannot add value to document");
 
     // Test null arguments
-    if ( mokaccino_d_add_value(&d, NULL, "value") != MOKACCINO_ERROR ){
-        printf("ERROR expected MOKACCINO_ERROR for NULL field\n");
-        return 1;
-    }
+    ASSERT(mokaccino_d_add_value(&d, NULL, "value") == MOKACCINO_ERROR, "ERROR expected MOKACCINO_ERROR for NULL field");
 
-    if ( mokaccino_d_add_value(&d, "field", NULL) != MOKACCINO_ERROR ){
-        printf("ERROR expected MOKACCINO_ERROR for NULL value\n");
-        return 1;
-    }
+    ASSERT(mokaccino_d_add_value(&d, "field", NULL) == MOKACCINO_ERROR, "ERROR expected MOKACCINO_ERROR for NULL value");
 
-    if ( mokaccino_d_add_value(&d, NULL, NULL) != MOKACCINO_ERROR ){
-        printf("ERROR expected MOKACCINO_ERROR for NULL field and value\n");
-        return 1;
-    }
+    ASSERT(mokaccino_d_add_value(&d, NULL, NULL) == MOKACCINO_ERROR, "ERROR expected MOKACCINO_ERROR for NULL field and value");
 
     char* buffer_f = calloc(32, sizeof(char));
     char* buffer_v = calloc(32, sizeof(char));
-    
+
     snprintf(buffer_f, 32, "field2");
     snprintf(buffer_v, 32, "value2");
 
-    if ( mokaccino_d_add_value(&d, buffer_f, buffer_v) == MOKACCINO_ERROR ){
-        printf("ERROR cannot add value to document\n");
-        return 1;
-    }
+    ASSERT(mokaccino_d_add_value(&d, buffer_f, buffer_v) != MOKACCINO_ERROR, "ERROR cannot add value to document");
 
     // It's safe to free those buffers. Copy of the strings are now owned
     // by the document.
@@ -68,24 +42,16 @@ int main(void) {
 
     // Invalid UTF8 bytes for value
     // "\xe2\x28\xa1"
-    if ( mokaccino_d_add_value(&d, "field", "\xe2\x28\xa1") != MOKACCINO_ERROR ){
-        printf("ERROR added invalid UTF8 value to document\n");
-        return 1;
-    }
+    ASSERT(mokaccino_d_add_value(&d, "field", "\xe2\x28\xa1") == MOKACCINO_ERROR, "ERROR added invalid UTF8 value to document");
 
     // Invalid UTF8 bytes for field
-    if ( mokaccino_d_add_value(&d, "\xe2\x28\xa1", "value") != MOKACCINO_ERROR ){
-        printf("ERROR added invalid UTF8 field to document\n");
-        return 1;
-    }
+    ASSERT(mokaccino_d_add_value(&d, "\xe2\x28\xa1", "value") == MOKACCINO_ERROR, "ERROR added invalid UTF8 field to document");
 
     char* debug = mokaccino_d_debug(d);
     printf("Document: %s\n", debug);
 
-
     mokaccino_d_free(&d);
     mokaccino_string_free(&debug);
-
 
     // All good.
     return 0;
