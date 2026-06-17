@@ -101,6 +101,9 @@ int main(void) {
 
     ASSERT(mokaccino_q_and(NULL, &q_valid) == MOKACCINO_ERROR, "mokaccino_q_and should return MOKACCINO_ERROR for NULL");
 
+    // Test Pointer aliasing / double free protection
+    ASSERT(mokaccino_q_and(&q_valid, &q_valid) == MOKACCINO_ERROR, "mokaccino_q_and should return MOKACCINO_ERROR for aliased pointers to avoid double-free");
+
     mokaccino_q_free(&q_valid);
 
     // All good.

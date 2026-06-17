@@ -63,6 +63,11 @@ where
         return MOKACCINO_ERROR;
     }
 
+    if qq1 == qq2 {
+        eprintln!("q1 and q2 cannot point to the same *Query");
+        return MOKACCINO_ERROR;
+    }
+
     let bq1 = unsafe { Box::from_raw(qq1) };
     let bq2 = unsafe { Box::from_raw(qq2) };
 
