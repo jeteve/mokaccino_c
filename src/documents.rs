@@ -12,13 +12,13 @@ pub struct Document(pub(crate) mokaccino::prelude::Document);
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn mokaccino_d_new(d: *mut *mut Document) -> c_int {
     if d.is_null() {
-        eprintln!("ERROR: given q pointer is null");
+        eprintln!("ERROR: given d pointer is null");
         return MOKACCINO_ERROR;
     }
 
     if !unsafe { *d }.is_null() {
         eprintln!(
-            "ERROR: given q pointer is NOT a null *Document. Calling this would lead to a memory leak"
+            "ERROR: given d pointer is NOT a null *Document. Calling this would lead to a memory leak"
         );
         return MOKACCINO_ERROR;
     }
@@ -66,12 +66,12 @@ pub unsafe extern "C" fn mokaccino_d_add_value(
     value: *const std::ffi::c_char,
 ) -> c_int {
     if d.is_null() {
-        eprintln!("ERROR: given q pointer is null");
+        eprintln!("ERROR: given d pointer is null");
         return MOKACCINO_ERROR;
     }
     let dd = unsafe { *d };
     if dd.is_null() {
-        eprintln!("ERROR: given q pointer points to a NULL *Document");
+        eprintln!("ERROR: given d pointer points to a NULL *Document");
         return MOKACCINO_ERROR;
     }
 
