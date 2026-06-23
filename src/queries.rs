@@ -131,11 +131,10 @@ pub unsafe extern "C" fn mokaccino_q_negation(q: *mut *mut Query) -> c_int {
         return MOKACCINO_ERROR;
     }
 
-    let qq = unsafe { Box::from_raw(qq) };
-    let new_q = mokaccino::prelude::Query::negation((*qq).0);
+    let new_q = mokaccino::prelude::Query::negation(unsafe { std::ptr::read(&(*qq).0) });
 
     unsafe {
-        *q = Box::into_raw(Box::new(Query(new_q)));
+        std::ptr::write(&mut (*qq).0, new_q);
     }
 
     0
