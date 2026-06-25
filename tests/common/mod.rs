@@ -51,7 +51,7 @@ pub(crate) fn assert_run_c(c_prog: &str) {
 
     let compile_status = clang_cmd
         .status()
-        .expect("Failed to execute clang compiler. Is gcc installed?");
+        .expect("Failed to execute clang compiler. Is clang/llvm installed?");
 
     assert!(
         compile_status.success(),
