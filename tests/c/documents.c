@@ -53,6 +53,14 @@ int main(void) {
     mokaccino_d_free(&d);
     mokaccino_string_free(&debug);
 
+    // Test mokaccino_d_free with NULL and NULL pointer
+    mokaccino_d_free(NULL);
+    Document* d2 = NULL;
+    mokaccino_d_free(&d2);
+
+    // Test mokaccino_d_debug with NULL
+    ASSERT(mokaccino_d_debug(NULL) == NULL, "ERROR mokaccino_d_debug(NULL) should return NULL");
+
     // All good.
     return 0;
 
