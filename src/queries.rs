@@ -325,7 +325,7 @@ pub unsafe extern "C" fn mokaccino_q_h3in(
         if let Ok(ci) = v.parse::<CellIndex>() {
             f.h3in(ci)
         } else {
-            eprintln!("WARNING: Given value {v} is not a correct H3 Cell Index.");
+            eprintln!("WARNING: Given value {v:?} is not a correct H3 Cell Index.");
             f.has_value(v)
         }
     };
