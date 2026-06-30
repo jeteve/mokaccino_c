@@ -20,7 +20,9 @@ pub unsafe extern "C" fn mokaccino_q_debug(q: *const Query) -> *mut std::ffi::c_
         return std::ptr::null_mut();
     }
     let query = unsafe { &*q };
-    let debug_str = format!("{:?}", query.0);
+    use std::fmt::Write;
+    let mut debug_str = String::with_capacity(128);
+    let _ = write!(&mut debug_str, "{:?}", query.0);
     match std::ffi::CString::new(debug_str) {
         Ok(c_str) => c_str.into_raw(),
         Err(_) => std::ptr::null_mut(),
@@ -40,7 +42,10 @@ pub unsafe extern "C" fn mokaccino_q_tostring(q: *const Query) -> *mut std::ffi:
         return std::ptr::null_mut();
     }
     let query = unsafe { &*q };
-    match std::ffi::CString::new(query.0.to_string()) {
+    use std::fmt::Write;
+    let mut s = String::with_capacity(128);
+    let _ = write!(&mut s, "{}", query.0);
+    match std::ffi::CString::new(s) {
         Ok(c_str) => c_str.into_raw(),
         Err(_) => std::ptr::null_mut(),
     }
