@@ -24,6 +24,8 @@ void on_match(uint32_t id, void* user_data) {
 int main(void) {
     printf("Mokaccino percolator test with version: %s\n", mokaccino_version());
 
+    ASSERT(mokaccino_p_new(NULL) == MOKACCINO_ERROR, "ERROR: mokaccino_p_new allowed NULL pointer");
+
     Percolator* p = NULL;
     ASSERT(mokaccino_p_new(&p) != MOKACCINO_ERROR, "ERROR cannot create correct percolator");
 
@@ -36,6 +38,13 @@ int main(void) {
 
     // Check we get an error if percolator is NULL
     ASSERT(mokaccino_p_index_id(NULL, &q, 42) == MOKACCINO_ERROR, "ERROR expected MOKACCINO_ERROR for NULL percolator");
+
+    // Check we get an error if q is NULL
+    ASSERT(mokaccino_p_index_id(p, NULL, 42) == MOKACCINO_ERROR, "ERROR expected MOKACCINO_ERROR for NULL q");
+
+    // Check we get an error if *q is NULL
+    Query* empty_q = NULL;
+    ASSERT(mokaccino_p_index_id(p, &empty_q, 42) == MOKACCINO_ERROR, "ERROR expected MOKACCINO_ERROR for NULL *q");
 
     // And index in the percolator under the number 42
     ASSERT(mokaccino_p_index_id(p, &q, 42) != MOKACCINO_ERROR, "ERROR cannot index in percolator");
@@ -84,6 +93,11 @@ int main(void) {
     ASSERT(results.count == 1, "ERROR: Missing some matches");
 
     mokaccino_p_free(&p);
+
+    // Test freeing NULLs
+    mokaccino_p_free(NULL);
+    Percolator* null_p = NULL;
+    mokaccino_p_free(&null_p);
 
     // All good.
 
