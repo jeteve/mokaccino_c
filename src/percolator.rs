@@ -12,17 +12,7 @@ pub struct Percolator(mokaccino::prelude::Percolator);
 ///
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn mokaccino_p_new(p: *mut *mut Percolator) -> c_int {
-    if p.is_null() {
-        eprintln!("ERROR: given p pointer is null");
-        return MOKACCINO_ERROR;
-    }
-
-    if !unsafe { *p }.is_null() {
-        eprintln!(
-            "ERROR: given p pointer is NOT a null *Percolator. Calling this would lead to a memory leak"
-        );
-        return MOKACCINO_ERROR;
-    }
+    ensure_ptr_ptr_is_null!(p, "p", "Percolator");
 
     unsafe {
         *p = Box::into_raw(Box::new(Percolator(
@@ -47,21 +37,8 @@ pub unsafe extern "C" fn mokaccino_p_index_id(
     q: *mut *mut super::queries::Query,
     id: u32,
 ) -> c_int {
-    if p.is_null() {
-        eprintln!("ERROR given *p is NULL");
-        return MOKACCINO_ERROR;
-    }
-
-    if q.is_null() {
-        eprintln!("ERROR given *q is NULL");
-        return MOKACCINO_ERROR;
-    }
-
-    let qq = unsafe { *q };
-    if qq.is_null() {
-        eprintln!("ERROR given *q points to a NULL *Query");
-        return MOKACCINO_ERROR;
-    }
+    ensure_ptr_not_null!(p, "given *p is NULL");
+    let qq = ensure_ptr_ptr_not_null!(q, "q", "Query");
 
     let qq: super::queries::Query = *{ unsafe { Box::from_raw(qq) } };
     let rust_p = unsafe { &mut *p };
@@ -98,15 +75,8 @@ pub unsafe extern "C" fn mokaccino_p_percolate(
     cb: Option<unsafe extern "C" fn(u32, *mut std::ffi::c_void)>,
     user_data: *mut std::ffi::c_void,
 ) -> c_int {
-    if p.is_null() {
-        eprintln!("ERROR given *p is NULL");
-        return MOKACCINO_ERROR;
-    }
-
-    if d.is_null() {
-        eprintln!("ERROR given *d is NULL");
-        return MOKACCINO_ERROR;
-    }
+    ensure_ptr_not_null!(p, "given *p is NULL");
+    ensure_ptr_not_null!(d, "given *d is NULL");
 
     let dd = unsafe { &*d };
     let rust_p = unsafe { &*p };
