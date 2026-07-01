@@ -120,16 +120,7 @@ pub unsafe extern "C" fn mokaccino_q_or(q1: *mut *mut Query, q2: *mut *mut Query
 /// - *q is not NULL
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn mokaccino_q_negation(q: *mut *mut Query) -> c_int {
-    if q.is_null() {
-        eprintln!("ERROR: given q pointer is null");
-        return MOKACCINO_ERROR;
-    }
-
-    let qq = unsafe { *q };
-    if qq.is_null() {
-        eprintln!("ERROR: given q pointer points to a NULL *Query");
-        return MOKACCINO_ERROR;
-    }
+    let qq = ensure_ptr_ptr_not_null!(q, "q", "Query");
 
     let new_q = mokaccino::prelude::Query::negation(unsafe { std::ptr::read(&(*qq).0) });
 
@@ -149,23 +140,8 @@ unsafe fn field_int_build<F>(
 where
     F: Fn(&str, i64) -> mokaccino::prelude::Query,
 {
-    if q.is_null() {
-        eprintln!("ERROR: given q pointer is null");
-        return MOKACCINO_ERROR;
-    }
-
-    let qq = unsafe { *q };
-    if !qq.is_null() {
-        eprintln!(
-            "ERROR: given q pointer is NOT a null *Query. Calling this would lead to a memory leak"
-        );
-        return MOKACCINO_ERROR;
-    }
-
-    if field.is_null() {
-        eprintln!("ERROR: Field is null");
-        return MOKACCINO_ERROR;
-    }
+    ensure_ptr_ptr_is_null!(q, "q", "Query");
+    ensure_ptr_not_null!(field, "Field is null");
 
     let field_c = cstr_to_str!(field, "Invalid UTF8 field string");
 
@@ -255,18 +231,7 @@ unsafe fn two_strings_build<F>(
 where
     F: Fn(&str, &str) -> mokaccino::prelude::Query,
 {
-    if q.is_null() {
-        eprintln!("ERROR: given q pointer is null");
-        return MOKACCINO_ERROR;
-    }
-
-    let qq = unsafe { *q };
-    if !qq.is_null() {
-        eprintln!(
-            "ERROR: given q pointer is NOT a null *Query. Calling this would lead to a memory leak"
-        );
-        return MOKACCINO_ERROR;
-    }
+    ensure_ptr_ptr_is_null!(q, "q", "Query");
 
     if field.is_null() || value.is_null() {
         eprintln!("ERROR: Either field or value is null");
@@ -325,7 +290,7 @@ pub unsafe extern "C" fn mokaccino_q_h3in(
         if let Ok(ci) = v.parse::<CellIndex>() {
             f.h3in(ci)
         } else {
-            eprintln!("WARNING: Given value {v} is not a correct H3 Cell Index.");
+            eprintln!("WARNING: Given value {v:?} is not a correct H3 Cell Index.");
             f.has_value(v)
         }
     };

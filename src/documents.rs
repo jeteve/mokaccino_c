@@ -11,17 +11,7 @@ pub struct Document(pub(crate) mokaccino::prelude::Document);
 /// - Use `mokaccino_d_free` when you're done with the document.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn mokaccino_d_new(d: *mut *mut Document) -> c_int {
-    if d.is_null() {
-        eprintln!("ERROR: given d pointer is null");
-        return MOKACCINO_ERROR;
-    }
-
-    if !unsafe { *d }.is_null() {
-        eprintln!(
-            "ERROR: given d pointer is NOT a null *Document. Calling this would lead to a memory leak"
-        );
-        return MOKACCINO_ERROR;
-    }
+    ensure_ptr_ptr_is_null!(d, "d", "Document");
 
     let new_doc = mokaccino::prelude::Document::new();
     unsafe {
@@ -65,15 +55,7 @@ pub unsafe extern "C" fn mokaccino_d_add_value(
     field: *const std::ffi::c_char,
     value: *const std::ffi::c_char,
 ) -> c_int {
-    if d.is_null() {
-        eprintln!("ERROR: given d pointer is null");
-        return MOKACCINO_ERROR;
-    }
-    let dd = unsafe { *d };
-    if dd.is_null() {
-        eprintln!("ERROR: given d pointer points to a NULL *Document");
-        return MOKACCINO_ERROR;
-    }
+    let dd = ensure_ptr_ptr_not_null!(d, "d", "Document");
 
     if field.is_null() || value.is_null() {
         eprintln!("ERROR: Either field or value is null");
