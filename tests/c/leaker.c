@@ -1,7 +1,7 @@
 // A minimal C program that leaks memory.
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 
 int main(void) {
 char *leaked = malloc(1024 * sizeof(char));
