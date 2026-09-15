@@ -28,12 +28,17 @@ pub unsafe extern "C" fn mokaccino_d_new(d: *mut *mut Document) -> c_int {
 /// - Free the returned char* with `mokaccino_string_free`
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn mokaccino_d_debug(d: *const Document) -> *mut std::ffi::c_char {
+    use std::fmt::Write;
+
     if d.is_null() {
         return std::ptr::null_mut();
     }
     let document = unsafe { &*d };
-    let debug_str = format!("{:?}", document.0);
-    match std::ffi::CString::new(debug_str) {
+    let mut buffer = String::with_capacity(128);
+    if write!(buffer, "{:?}", document.0).is_err() {
+        return std::ptr::null_mut();
+    }
+    match std::ffi::CString::new(buffer) {
         Ok(c_str) => c_str.into_raw(),
         Err(_) => std::ptr::null_mut(),
     }
